@@ -133,8 +133,10 @@ export function OrbRow({
               Close
             </button>
           </div>
-          <div className="relative flex-1" onClick={(e) => e.stopPropagation()}>
-            <OrbStage orbId={enlarged.id} mode="preview" detail={1} bloom={0.2} />
+          <div className="relative min-h-0 flex-1" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute inset-0">
+              <OrbStage orbId={enlarged.id} mode="preview" detail={1} bloom={0.2} />
+            </div>
           </div>
           <div className="flex items-center justify-center gap-3 px-6 pb-8" onClick={(e) => e.stopPropagation()}>
             {enlarged.included || ownedIds.has(enlarged.id) ? (
