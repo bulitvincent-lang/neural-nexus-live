@@ -31,7 +31,7 @@ function OrbPage() {
       className="fixed inset-0 select-none overflow-hidden"
       style={{
         background:
-          "radial-gradient(circle at 50% 46%, rgba(26,48,92,0.34) 0%, rgba(6,10,22,0.94) 46%, #01030a 100%)",
+          "radial-gradient(circle at 50% 46%, rgba(30,56,104,0.26) 0%, rgba(5,9,20,0.96) 38%, #01030a 100%)",
       }}
     >
       <NeuralCanvas />

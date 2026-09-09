@@ -67,7 +67,7 @@ function LandingPage() {
       className="min-h-screen text-[#e6f2ff]"
       style={{
         background:
-          "radial-gradient(circle at 50% 18%, rgba(26,48,92,0.4) 0%, rgba(6,10,22,0.96) 48%, #01030a 100%)",
+          "radial-gradient(circle at 50% 18%, rgba(30,56,104,0.3) 0%, rgba(5,9,20,0.97) 40%, #01030a 100%)",
       }}
     >
       {/* Hero */}
