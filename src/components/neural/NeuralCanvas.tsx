@@ -34,6 +34,13 @@ export function NeuralCanvas() {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
+  // Real MCP activity (tool calls, resource reads, sampling) -> sphere.
+  useEffect(() => {
+    const mcp = new McpActivityAdapter();
+    mcp.start(activityBus);
+    return () => mcp.stop();
+  }, []);
+
   // Mock activity: development only, no visible surface.
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -41,6 +48,7 @@ export function NeuralCanvas() {
     mock.start(activityBus);
     return () => mock.stop();
   }, []);
+
 
   const quality = QUALITY_PROFILES[level];
 
