@@ -1,4 +1,4 @@
-import { AdaptiveDpr, Environment, Lightformer, OrbitControls } from "@react-three/drei";
+import { Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from "@react-three/postprocessing";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
@@ -107,7 +107,6 @@ export function OrbStage({
           <Orb engineRef={engineRef} detail={quality} />
         </group>
       </Suspense>
-      <AdaptiveDpr pixelated={false} />
       {interactive ? (
         <OrbitControls
           enablePan={false}
