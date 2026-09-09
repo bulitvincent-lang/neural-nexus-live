@@ -94,7 +94,7 @@ function LandingPage() {
           <div className="mt-10 flex flex-col items-center gap-4">
             <a
               href={downloadUrl(primary)}
-              className="group relative inline-flex items-center gap-3 rounded-full border border-[#4ce3ff]/30 bg-[#0b1830]/70 px-8 py-4 text-sm tracking-wide backdrop-blur transition-all hover:border-[#4ce3ff]/70 hover:bg-[#102murky]/0 hover:shadow-[0_0_40px_-8px_rgba(76,227,255,0.55)]"
+              className="group relative inline-flex items-center gap-3 rounded-full border border-[#4ce3ff]/30 bg-[#0b1830]/70 px-8 py-4 text-sm tracking-wide backdrop-blur transition-all hover:border-[#4ce3ff]/70 hover:shadow-[0_0_40px_-8px_rgba(76,227,255,0.55)]"
             >
               <span className="h-2 w-2 rounded-full bg-[#4ce3ff] shadow-[0_0_12px_2px_rgba(76,227,255,0.8)]" />
               Download for {primary.label}
