@@ -138,10 +138,11 @@ export function GalaxyOrb({ engineRef, detail = 1 }: OrbViewProps) {
     uniforms.uTime.value = clock.current;
     uniforms.uActivity.value = p.activityLevel;
     uniforms.uConverge.value = p.convergenceLevel;
-    uniforms.uSize.value = 1.55 + p.glowIntensity * 0.9;
+    uniforms.uSize.value = 1.25 + p.glowIntensity * 0.6;
     if (coreMat.current) {
-      coreMat.current.opacity = 0.14 + p.activityLevel * 0.4 + p.waveStrength * 0.25;
+      coreMat.current.opacity = 0.07 + p.activityLevel * 0.18 + p.waveStrength * 0.12;
     }
+
     if (group.current) {
       group.current.rotation.y += dt * (0.05 + p.rotationSpeed * 0.6);
       group.current.rotation.x = -0.42 + Math.sin(clock.current * 0.09) * 0.09;
