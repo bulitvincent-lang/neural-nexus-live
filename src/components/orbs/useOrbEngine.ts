@@ -21,4 +21,6 @@ export interface OrbViewProps {
   engineRef: React.MutableRefObject<NeuralEngine | null>;
   /** 0.4 (light store preview) .. 1 (full desktop quality) */
   detail?: number;
+  /** 0 = resting, 1 = fully assembled and lit (hover / full screen) */
+  energy?: number;
 }

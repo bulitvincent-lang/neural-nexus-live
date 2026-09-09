@@ -264,7 +264,8 @@ function OrbRowItem({
             mode="preview"
             detail={0.6}
             interactive={false}
-            bloom={hot ? 0.3 : 0.14}
+            energy={hot ? 1 : 0}
+            bloom={hot ? 0.34 : 0.12}
           />
         ) : null}
         {active ? (
@@ -276,9 +277,9 @@ function OrbRowItem({
 
       <div className="mt-1 text-center">
         <p className="text-[13px] tracking-wide text-[#eaf2ff]">{orb.name}</p>
-        <p className="mt-1 text-[11px] text-[#93aac8]">
-          {orb.included ? "Included" : owned ? "Owned" : `${formatPrice(ORB_PRICE)} · one-time`}
-        </p>
+        {orb.included || owned ? (
+          <p className="mt-1 text-[11px] text-[#93aac8]">{orb.included ? "Included" : "Owned"}</p>
+        ) : null}
         <div className="mt-3 flex justify-center">
           {owned ? (
             <button
