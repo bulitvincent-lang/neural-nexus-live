@@ -178,7 +178,7 @@ void main() {
   float body = pow(1.0 - f, 1.4);
   float flicker = 0.85 + 0.15 * sin(uTime * 2.1);
   vec3 col = mix(uMain, uHot, 0.35 + uActivity * 0.5) * (0.5 + body * 1.6) * flicker;
-  gl_FragColor = vec4(col * 0.7, (0.05 + body * 0.16) * (0.4 + uActivity * 0.6));
+  gl_FragColor = vec4(col * 0.55, (0.02 + body * 0.09) * (0.4 + uActivity * 0.6));
 }
 `;
 
@@ -371,7 +371,8 @@ function buildLinks(pts: THREE.Vector3[], degree: number) {
         if (d < best[worst]!.d) best[worst] = { j, d };
       }
     }
-    for (const b of best) if (b.j > i) a.push(i, b.j);
+    // long links look like random polygons; keep the web local
+    for (const b of best) if (b.j > i && b.d < 0.16) a.push(i, b.j);
   }
   return a;
 }
