@@ -26,6 +26,8 @@ const en: Dict = {
   "hero.tryNote": "in your browser",
   "hero.soon":
     "The app for macOS, Windows and Linux is coming very soon. In the meantime the live preview above runs right here.",
+  "hero.firstRun":
+    "First launch: Windows shows \"Windows protected your PC\" — click More info, then Run anyway. On macOS, right-click the app and choose Open. This happens because the app is new, not yet certified by Microsoft or Apple.",
   "hero.howto": "How to connect your AI in three steps",
 
   "f1.title": "No interface",
