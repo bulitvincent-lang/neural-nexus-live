@@ -42,7 +42,7 @@ export function OrbStage({
   detail,
   managed = false,
   interactive = true,
-  bloom = 0.95,
+  bloom = 0.55,
 }: OrbStageProps) {
   const engineRef = useRef<NeuralEngine | null>(null);
   const [visible, setVisible] = useState(true);
