@@ -4,9 +4,10 @@ import type { AgentActivityEvent } from "@/lib/neural/types";
 /** ~26 s scripted demonstration: idle -> analysis -> work -> parallel -> result. */
 const SCRIPT: { at: number; event: Omit<AgentActivityEvent, "timestamp"> }[] = [
   { at: 0, event: { type: "IDLE" } },
-  { at: 2200, event: { type: "USER_INPUT", intensity: 0.8 } },
-  { at: 2600, event: { type: "AI_STARTED", intensity: 0.5, duration: 2200 } },
-  { at: 3400, event: { type: "ANALYSIS", intensity: 0.7, complexity: 0.7, duration: 4200 } },
+  { at: 400, event: { type: "USER_INPUT", intensity: 0.85 } },
+  { at: 800, event: { type: "AI_STARTED", intensity: 0.6, duration: 2400 } },
+  { at: 1800, event: { type: "ANALYSIS", intensity: 0.7, complexity: 0.7, duration: 4200 } },
+
   { at: 6200, event: { type: "MEMORY_ACCESS", intensity: 0.6, duration: 2200 } },
   { at: 8000, event: { type: "TOOL_CALL", intensity: 0.75, duration: 2600 } },
   { at: 10200, event: { type: "WEB_SEARCH", intensity: 0.7, duration: 3000 } },
