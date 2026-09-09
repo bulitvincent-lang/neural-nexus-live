@@ -1,4 +1,4 @@
-import { OrbitControls } from "@react-three/drei";
+import { AdaptiveDpr, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from "@react-three/postprocessing";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
