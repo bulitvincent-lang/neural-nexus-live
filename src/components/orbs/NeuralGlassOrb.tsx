@@ -360,6 +360,26 @@ function buildNodes(v: OrbVariant, count: number) {
         t = 1 - blend;
         break;
       }
+      case "shard": {
+        // interlocking angular prisms: sharp blades radiating from the core
+        const blade = i % 14;
+        const axis = fib(blade, 14);
+        const side = new THREE.Vector3(-axis.z, 0.35, axis.x).normalize();
+        const along = Math.pow(rnd(), 0.7);
+        const width = (1 - along) * 0.3;
+        p = axis
+          .clone()
+          .multiplyScalar(0.2 + along * 0.78)
+          .addScaledVector(side, (rnd() - 0.5) * width * 2)
+          .addScaledVector(
+            new THREE.Vector3().crossVectors(axis, side).normalize(),
+            (rnd() - 0.5) * width,
+          );
+        // hard prismatic edges: pull some nodes exactly onto the blade spine
+        if (rnd() > 0.6) p.lerp(axis.clone().multiplyScalar(0.2 + along * 0.78), 0.85);
+        t = 0.15 + along * 0.85;
+        break;
+      }
       case "filament": {
         // long great-circle filaments
         const strand = i % 18;
