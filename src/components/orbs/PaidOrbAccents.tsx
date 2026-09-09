@@ -85,7 +85,7 @@ function GlassShell({ radius = 1.04, opacity = 0.12 }: { radius?: number; opacit
         color={VIOLET}
         roughness={0.08}
         metalness={0.08}
-        transmission={0.86}
+        transmission={0.72}
         thickness={0.35}
         ior={1.38}
         iridescence={0.72}
@@ -203,7 +203,7 @@ export function PaidOrbAccents({ orbId }: { orbId: Exclude<OrbId, "neural"> }) {
 
   return (
     <group ref={group}>
-      <RelicDust />
+      <RelicDust count={210} />
       <Accents orbId={orbId} />
     </group>
   );

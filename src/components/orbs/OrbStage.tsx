@@ -81,7 +81,7 @@ export function OrbStage({
 
   return (
     <Canvas
-      dpr={[1, 2]}
+      dpr={interactive ? [1, 2] : [0.85, 1.35]}
       frameloop={visible ? "always" : "never"}
       camera={camera}
       performance={{ min: 0.6 }}
@@ -122,7 +122,7 @@ export function OrbStage({
           zoomSpeed={0.25}
         />
       ) : null}
-      <EffectComposer enableNormalPass={false} multisampling={4}>
+      <EffectComposer enableNormalPass={false} multisampling={interactive ? 4 : 0}>
         <Bloom
           intensity={orbId === "neural" ? bloom : Math.max(bloom, 0.34)}
           luminanceThreshold={0.82}

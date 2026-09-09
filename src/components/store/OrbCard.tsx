@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { OrbStage } from "@/components/orbs/OrbStage";
 import { OrbThumb } from "@/components/store/OrbThumb";
@@ -29,8 +29,24 @@ export function OrbCard({
 }) {
   const owned = state !== "available";
   const [live, setLive] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const cardRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const element = cardRef.current;
+    if (!element) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(Boolean(entry?.isIntersecting)),
+      { rootMargin: "180px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  const showRealOrb = orb.id !== "neural" && visible;
   return (
     <article
+      ref={cardRef}
       onMouseEnter={() => setLive(true)}
       onMouseLeave={() => setLive(false)}
       onFocus={() => setLive(true)}
@@ -39,9 +55,15 @@ export function OrbCard({
     >
       <div className="relative h-48 w-full overflow-hidden">
         <OrbThumb orb={orb} className="h-full w-full" />
-        {live ? (
+        {showRealOrb ? (
           <div className="absolute inset-0 animate-fade-in">
-            <OrbStage orbId={orb.id} mode="preview" detail={0.86} interactive={false} />
+            <OrbStage
+              orbId={orb.id}
+              mode="preview"
+              detail={live ? 0.9 : 0.68}
+              interactive={false}
+              bloom={live ? 0.38 : 0.3}
+            />
           </div>
         ) : null}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_-10%,transparent_40%,rgba(6,10,20,0.55)_100%)]" />
