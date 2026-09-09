@@ -18,7 +18,7 @@ import {
 } from "./shaders";
 
 /** Cluster -> palette index: cold hues dominate, amber only once. */
-const TONE_BY_CLUSTER = [0, 1, 2, 4, 1, 0, 2, 5, 4];
+const TONE_BY_CLUSTER = [0, 1, 2, 4, 1, 0, 2, 4, 3];
 
 /** CPU mirror of the GLSL displace() so pulses ride exactly on the edges. */
 function displace(
@@ -97,7 +97,7 @@ export function NeuralSphere({
     }
 
     // fine dust particles at several depths
-    const D = Math.round(quality.nodes * 1.6);
+    const D = Math.round(quality.nodes * 2.4);
     const dustPos = new Float32Array(D * 3);
     const dustSeed = new Float32Array(D);
     for (let i = 0; i < D; i++) {
@@ -363,7 +363,7 @@ export function NeuralSphere({
         breathe *
         (edge.dynamic === 0 ? 0.05 : edge.dynamic > 0.9 ? 0.006 : 0.016) *
         1.0;
-      target += open * (0.06 * clusterAct + 0.5 * endpoints * (0.3 + 0.7 * p.glowIntensity)) * breathe;
+      target += open * (0.045 * clusterAct + 0.42 * endpoints * (0.3 + 0.7 * p.glowIntensity)) * breathe;
       if (p.disturbance > 0.02 && Math.random() < 0.02 * p.disturbance) target *= 0.15;
       target = Math.min(0.85, target + edgeCurrent[e] * 0.35);
       edgeCurrent[e] *= Math.exp(-dt * 3.2);

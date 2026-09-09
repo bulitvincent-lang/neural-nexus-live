@@ -66,8 +66,8 @@ export interface QualityProfile {
 }
 
 export const QUALITY_PROFILES: Record<QualityLevel, QualityProfile> = {
-  ULTRA: { level: "ULTRA", nodes: 780, neighbors: 4, maxPulses: 520, bloom: 1.15, dpr: [1, 2] },
-  HIGH: { level: "HIGH", nodes: 560, neighbors: 3, maxPulses: 380, bloom: 1.0, dpr: [1, 1.75] },
-  BALANCED: { level: "BALANCED", nodes: 380, neighbors: 3, maxPulses: 240, bloom: 0.85, dpr: [1, 1.5] },
-  LOW_POWER: { level: "LOW_POWER", nodes: 220, neighbors: 2, maxPulses: 120, bloom: 0.6, dpr: [1, 1] },
+  ULTRA: { level: "ULTRA", nodes: 1100, neighbors: 4, maxPulses: 520, bloom: 1.15, dpr: [1, 2] },
+  HIGH: { level: "HIGH", nodes: 850, neighbors: 3, maxPulses: 380, bloom: 1.0, dpr: [1, 1.75] },
+  BALANCED: { level: "BALANCED", nodes: 620, neighbors: 3, maxPulses: 240, bloom: 0.85, dpr: [1, 1.5] },
+  LOW_POWER: { level: "LOW_POWER", nodes: 340, neighbors: 2, maxPulses: 120, bloom: 0.6, dpr: [1, 1] },
 };
