@@ -1,3 +1,4 @@
+import { getChannelKey } from "../channel";
 import { mcpEventType, type McpSignal } from "../mcp/mapping";
 import type { ActivityEmit, ActivityProvider, ProviderState } from "./types";
 
@@ -103,7 +104,7 @@ export class MCPActivityProvider implements ActivityProvider {
       return;
     }
     try {
-      const source = new EventSource(this.streamUrl);
+      const source = new EventSource(this.resolveStreamUrl());
       this.source = source;
       source.onopen = () => {
         this.state = "live";
