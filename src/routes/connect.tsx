@@ -1,7 +1,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 import { SITE, connectorDownloadUrl } from "@/config/site";
-import { LanguageSwitcher, useI18n } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/connect")({
   ssr: false,
@@ -46,7 +46,6 @@ function ConnectorGuide() {
           <Link to="/" className="text-[11px] uppercase tracking-[0.42em] text-[#9db9de]">
             {SITE.name}
           </Link>
-          <LanguageSwitcher />
         </div>
 
         <h1 className="text-3xl font-light text-white/90">{t("connect.title")}</h1>
