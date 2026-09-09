@@ -4,7 +4,9 @@ import { Bloom, EffectComposer, ToneMapping, Vignette } from "@react-three/postp
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { activityBus } from "@/lib/neural/eventBus";
+import { McpActivityAdapter } from "@/lib/neural/mcp/mcpAdapter";
 import { MockActivityAdapter } from "@/lib/neural/mockActivity";
+
 import type { NeuralEngine } from "@/lib/neural/neuralEngine";
 import { QUALITY_PROFILES, type QualityLevel } from "@/lib/neural/types";
 import { NeuralSphere } from "./NeuralSphere";
