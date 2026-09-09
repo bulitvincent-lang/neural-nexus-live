@@ -124,7 +124,7 @@ export function OrbStage({
       ) : null}
       <EffectComposer enableNormalPass={false} multisampling={interactive ? 4 : 0}>
         <Bloom
-          intensity={orbId === "neural" ? bloom : Math.max(bloom, 0.34)}
+          intensity={orbId === "neural" ? bloom : bloom}
           luminanceThreshold={0.82}
           luminanceSmoothing={0.4}
           mipmapBlur

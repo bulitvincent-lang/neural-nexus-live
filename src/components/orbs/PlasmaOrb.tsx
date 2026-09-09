@@ -33,9 +33,9 @@ void main() {
   gl_Position = projectionMatrix * mv;
 
   // each filament switches on with the field density
-  float gate = step(h(aFil * 1.37), 0.10 + uDensity * 0.95);
-  float flicker = 0.35 + 0.65 * pow(abs(sin(uTime * (3.0 + h(aFil) * 9.0) + aFil)), 2.0);
-  vA = gate * env * flicker * (0.16 + 0.85 * uActivity + uBurst * 0.6);
+  float gate = step(h(aFil * 1.37), 0.48 + uDensity * 0.48);
+  float flicker = 0.58 + 0.42 * pow(abs(sin(uTime * (3.0 + h(aFil) * 9.0) + aFil)), 2.0);
+  vA = gate * env * flicker * (0.42 + 0.62 * uActivity + uBurst * 0.6);
   vT = aT;
   vFil = aFil;
 }
@@ -51,7 +51,7 @@ void main() {
   vec3 white = vec3(1.0);
   vec3 col = mix(cold, hot, fract(vFil * 0.271));
   col = mix(col, white, smoothstep(0.35, 0.5, abs(vT - 0.5)) * 0.35);
-  gl_FragColor = vec4(col * (0.6 + vA * 0.8), clamp(vA * 0.8, 0.0, 0.85));
+  gl_FragColor = vec4(col * (0.65 + vA * 0.7), clamp(vA, 0.0, 0.9));
 }
 `;
 
@@ -123,7 +123,7 @@ export function PlasmaOrb({ engineRef, detail = 1 }: OrbViewProps) {
   const lastWave = useRef(0);
 
   const data = useMemo(() => {
-    const filaments = detail < 0.7 ? 60 : 150;
+    const filaments = detail < 0.7 ? 90 : 180;
     const steps = 22;
     const segsPerFil = steps - 1;
     const verts = filaments * segsPerFil * 2;

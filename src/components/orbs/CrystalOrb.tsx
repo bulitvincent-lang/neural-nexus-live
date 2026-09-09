@@ -70,7 +70,7 @@ export function CrystalOrb({ engineRef, detail = 1 }: OrbViewProps) {
   const clock = useRef(0);
   const mesh = useRef<THREE.InstancedMesh>(null);
 
-  const count = detail < 0.7 ? 70 : 120;
+  const count = detail < 0.7 ? 40 : 64;
 
   const attrs = useMemo(() => {
     const seed = new Float32Array(count);
@@ -84,17 +84,17 @@ export function CrystalOrb({ engineRef, detail = 1 }: OrbViewProps) {
     const s = new THREE.Vector3();
     for (let i = 0; i < count; i++) {
       // fibonacci shell + a denser inner shard core
-      const inner = i % 4 === 0;
+       const inner = i % 5 === 0;
       const t = (i + 0.5) / count;
       const y = 1 - 2 * t;
       const r = Math.sqrt(Math.max(0, 1 - y * y));
       const phi = i * 2.399963;
-      const rad = inner ? 0.3 + Math.random() * 0.22 : 0.68 + Math.random() * 0.22;
+       const rad = inner ? 0.22 + Math.random() * 0.18 : 0.58 + Math.random() * 0.16;
       v.set(Math.cos(phi) * r, y, Math.sin(phi) * r).multiplyScalar(rad);
       e.set(Math.random() * 6.28, Math.random() * 6.28, Math.random() * 6.28);
       q.setFromEuler(e);
-      const size = (inner ? 0.09 : 0.14) * (0.55 + Math.random() * 0.95);
-      s.set(size * (0.6 + Math.random() * 0.8), size * (1.1 + Math.random() * 1.4), size);
+       const size = (inner ? 0.07 : 0.095) * (0.7 + Math.random() * 0.55);
+       s.set(size * (0.7 + Math.random() * 0.45), size * (1.15 + Math.random() * 0.8), size);
       m.compose(v.clone(), q.clone(), s.clone());
       matrices.push(m.clone());
       seed[i] = Math.random();
@@ -146,15 +146,19 @@ export function CrystalOrb({ engineRef, detail = 1 }: OrbViewProps) {
 
   return (
     <group ref={group}>
-      {/* translucent inner body: keeps the shards reading as one crystal */}
-      <mesh scale={0.62}>
-        <icosahedronGeometry args={[1, 1]} />
-        <meshBasicMaterial
-          color="#6f6bff"
+      {/* A single faceted gemstone gives the structure a deliberate silhouette. */}
+      <mesh scale={0.72} rotation={[0.2, 0.4, 0.08]}>
+        <icosahedronGeometry args={[1, 2]} />
+        <meshPhysicalMaterial
+          color="#8178ff"
+          roughness={0.08}
+          metalness={0.1}
+          transmission={0.42}
+          thickness={0.7}
+          ior={1.7}
+          iridescence={0.65}
           transparent
-          opacity={0.1}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
+          opacity={0.64}
         />
       </mesh>
 
