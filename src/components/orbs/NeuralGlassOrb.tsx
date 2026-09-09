@@ -3,6 +3,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import { useOrbEngine, type OrbViewProps } from "./useOrbEngine";
+console.log("NGO module loaded");
 
 /**
  * One realistic "neural network under glass" renderer, shared by every paid orb.
