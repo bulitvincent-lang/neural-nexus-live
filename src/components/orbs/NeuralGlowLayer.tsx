@@ -44,7 +44,7 @@ void main() {
   float idle = 0.22 + vPulse * 0.13;
   float intensity = idle + uActivity * 0.55 + vGlow * 2.4;
   float alpha = 0.20 + uActivity * 0.22 + vGlow * 0.62;
-  gl_FragColor = vec4(uColor * (0.30 + intensity * 0.45), clamp(alpha, 0.0, 0.42));
+  gl_FragColor = vec4(uColor * (0.5 + intensity * 0.9), clamp(alpha, 0.0, 0.75));
 }
 `;
 
@@ -62,7 +62,7 @@ void main() {
   float strength = 0.3 + proximity * 1.7 + uActivity * 0.6 + pulse * 0.16;
   vStrength = strength;
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  gl_PointSize = (2.2 + strength * 3.2) * (140.0 / -mv.z);
+  gl_PointSize = (0.8 + strength * 1.4) * (34.0 / -mv.z);
   gl_Position = projectionMatrix * mv;
 }
 `;
@@ -77,8 +77,8 @@ void main() {
   if (d > 0.5) discard;
   float core = smoothstep(0.24, 0.0, d);
   float halo = smoothstep(0.5, 0.05, d);
-  vec3 color = mix(uPrimary, uSecondary, core) * (0.35 + vStrength * 0.5);
-  gl_FragColor = vec4(color, halo * min(0.7, 0.18 + vStrength * 0.35));
+  vec3 color = mix(uPrimary, uSecondary, core) * (0.8 + vStrength * 1.2);
+  gl_FragColor = vec4(color, halo * min(1.0, 0.35 + vStrength * 0.7));
 }
 `;
 
@@ -88,7 +88,7 @@ varying float vB;
 void main() {
   vB = aBright;
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
-  gl_PointSize = (4.5 + aBright * 6.0) * (140.0 / -mv.z);
+  gl_PointSize = (1.6 + aBright * 2.4) * (34.0 / -mv.z);
   gl_Position = projectionMatrix * mv;
 }
 `;
@@ -105,7 +105,7 @@ void main() {
   float halo = pow(smoothstep(0.5, 0.0, d), 1.7);
   vec3 col = mix(uAccent, uHot, core);
   col = mix(col, vec3(1.0), 0.30);
-  gl_FragColor = vec4(col * (0.7 + vB * 0.6), clamp(core * 0.8 + halo * 0.25, 0.0, 0.85));
+  gl_FragColor = vec4(col * (1.3 + vB * 1.4), clamp(core + halo * 0.5, 0.0, 1.0));
 }
 `;
 
