@@ -549,6 +549,16 @@ export function NeuralGlassOrb({
     [col],
   );
 
+  const boltU = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uActivity: { value: 0 },
+      uHot: { value: col.hot },
+      uAccent: { value: col.accent },
+    }),
+    [col],
+  );
+
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
     clock.current += dt;
