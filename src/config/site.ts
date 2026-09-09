@@ -16,7 +16,7 @@ export const SITE = {
    * Tant que c'est false, la page d'accueil propose l'aperçu en ligne
    * au lieu de liens de téléchargement qui n'existent pas encore.
    */
-  releaseReady: false,
+  releaseReady: true,
   /** Browser companion (zip) + its plain-language install page. */
   connectorFile: "neural-orb-connector.zip",
   connectorPage: "/connect",
@@ -50,8 +50,8 @@ export const DOWNLOADS: DownloadTarget[] = [
   {
     id: "windows",
     label: "Windows",
-    note: "64-bit · .msi",
-    file: `Neural.Orb_${SITE.version}_x64_en-US.msi`,
+    note: "64-bit · installer",
+    file: `Neural.Orb_${SITE.version}_x64-setup.exe`,
   },
   {
     id: "linux",
