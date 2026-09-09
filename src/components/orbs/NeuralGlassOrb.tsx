@@ -935,7 +935,27 @@ export function NeuralGlassOrb({
         />
       </lineSegments>
 
+      {/* travelling impulses running along the links */}
+      <points frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[geo.sp, 3]} />
+          <bufferAttribute attach="attributes-aDir" args={[geo.sd, 3]} />
+          <bufferAttribute attach="attributes-aSeed" args={[geo.ss, 1]} />
+          <bufferAttribute attach="attributes-aTint" args={[geo.stt, 1]} />
+          <bufferAttribute attach="attributes-aOrder" args={[geo.so, 1]} />
+        </bufferGeometry>
+        <shaderMaterial
+          vertexShader={SPARK_VERT}
+          fragmentShader={SPARK_FRAG}
+          uniforms={sparkU}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+
       {/* nodes */}
+
       <points frustumCulled={false}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[geo.nodePos, 3]} />
