@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 const ITEMS: { to: string; label: string; hint: string }[] = [
   { to: "/store", label: "Orb Store", hint: "Browse and buy new spheres" },
-  { to: "/orb", label: "Live sphere", hint: "See it running in your browser" },
+  { to: "/pricing", label: "Pricing", hint: "What it costs, explained" },
   { to: "/connect", label: "Connect your AI", hint: "Link your assistants" },
   { to: "/privacy", label: "Privacy", hint: "What we never read" },
   { to: "/auth", label: "Sign in", hint: "Restore your orbs" },
@@ -33,16 +33,22 @@ export function SiteMenu() {
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label="Open menu"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-[11px] uppercase tracking-[0.28em] text-[#c3d6f2] transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+        className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-full border border-white/10 bg-white/[0.04] transition-colors hover:border-white/20 hover:bg-white/[0.08]"
       >
-        Menu
         <span
-          className={`inline-block text-[9px] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           aria-hidden
-        >
-          ▾
-        </span>
+          className={`block h-px w-4 bg-[#c3d6f2] transition-transform duration-200 ${open ? "translate-y-[6px] rotate-45" : ""}`}
+        />
+        <span
+          aria-hidden
+          className={`block h-px w-4 bg-[#c3d6f2] transition-opacity duration-200 ${open ? "opacity-0" : ""}`}
+        />
+        <span
+          aria-hidden
+          className={`block h-px w-4 bg-[#c3d6f2] transition-transform duration-200 ${open ? "-translate-y-[6px] -rotate-45" : ""}`}
+        />
       </button>
 
       {open ? (
