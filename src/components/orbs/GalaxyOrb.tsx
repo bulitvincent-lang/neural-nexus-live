@@ -1,18 +1,20 @@
 import { NeuralGlassOrb, type OrbVariant } from "./NeuralGlassOrb";
 import type { OrbViewProps } from "./useOrbEngine";
 
+/** Flat galactic disc with sweeping arms and a hot golden bulge. */
 const VARIANT: OrbVariant = {
-  topology: "spiral",
-  palette: ["#123a7a", "#4fb6ff", "#ffd7a1"],
-  accent: "#ffb058",
-  glass: "#7fd8ff",
-  nodes: 2200,
+  topology: "disc",
+  palette: ["#5a1f00", "#ff9a3c", "#fff2c9"],
+  accent: "#ffd27a",
+  glass: "#ffcf8a",
+  nodes: 3000,
   degree: 3,
-  breath: 0.02,
-  spin: 0.075,
-  rim: 1.1,
+  breath: 0.014,
+  spin: 0.13,
+  rim: 0.9,
   satellites: 7,
-  coreSize: 0.26,
+  coreSize: 0.3,
+  bolts: 10,
 };
 
 export function GalaxyOrb(props: OrbViewProps) {

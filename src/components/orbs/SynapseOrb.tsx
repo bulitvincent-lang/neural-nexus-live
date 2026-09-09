@@ -6,7 +6,7 @@ const VARIANT: OrbVariant = {
   palette: ["#132a6b", "#5ea8ff", "#ffe6b0"],
   accent: "#ffb347",
   glass: "#9fd0ff",
-  nodes: 2400,
+  nodes: 2500,
   degree: 3,
   breath: 0.03,
   spin: 0.05,
@@ -14,6 +14,7 @@ const VARIANT: OrbVariant = {
   rays: true,
   satellites: 5,
   coreSize: 0.22,
+  bolts: 14,
 };
 
 export function SynapseOrb(props: OrbViewProps) {

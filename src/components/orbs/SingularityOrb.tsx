@@ -6,13 +6,14 @@ const VARIANT: OrbVariant = {
   palette: ["#1b1440", "#7b6bff", "#ffcf8a"],
   accent: "#ff9d3d",
   glass: "#8f7dff",
-  nodes: 2800,
+  nodes: 2900,
   degree: 3,
-  breath: 0.018,
-  spin: 0.11,
-  rim: 1.2,
+  breath: 0.016,
+  spin: 0.12,
+  rim: 1.0,
   satellites: 9,
   coreSize: 0.2,
+  bolts: 12,
 };
 
 export function SingularityOrb(props: OrbViewProps) {

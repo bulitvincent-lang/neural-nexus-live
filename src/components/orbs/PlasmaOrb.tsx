@@ -6,12 +6,13 @@ const VARIANT: OrbVariant = {
   palette: ["#3a1155", "#c85cff", "#ffd6f6"],
   accent: "#ff7ad0",
   glass: "#d07dff",
-  nodes: 2600,
+  nodes: 2700,
   degree: 3,
-  breath: 0.035,
-  spin: 0.065,
-  rim: 1.25,
+  breath: 0.04,
+  spin: 0.07,
+  rim: 1.0,
   coreSize: 0.3,
+  bolts: 16,
 };
 
 export function PlasmaOrb(props: OrbViewProps) {
