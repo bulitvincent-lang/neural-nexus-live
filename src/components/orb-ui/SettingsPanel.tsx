@@ -119,8 +119,7 @@ export function SettingsPanel({
           />
         </Section>
 
-        <Section title={t("set.language")}>
-        </Section>
+
 
         <button
           type="button"
