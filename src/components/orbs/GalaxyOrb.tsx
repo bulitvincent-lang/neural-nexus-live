@@ -35,9 +35,10 @@ void main() {
   vI = mix(twinkle * (0.42 + 0.75 * uActivity), 1.0, core) * (1.0 - dust * 0.78);
   vArm = aArm;
   vType = aType;
-  float base = uSize * (core > 0.5 ? 2.1 : dust > 0.5 ? 1.5 : 1.0);
-  gl_PointSize = base * (0.85 + 0.5 * uActivity) * (240.0 / -mv.z);
+  float base = uSize * (core > 0.5 ? 1.5 : dust > 0.5 ? 1.2 : 0.85);
+  gl_PointSize = base * (0.85 + 0.4 * uActivity) * (150.0 / -mv.z);
 }
+
 `;
 
 const FRAG = /* glsl */ `
