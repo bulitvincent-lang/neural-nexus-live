@@ -1,12 +1,12 @@
 import { NeuralGlassOrb, type OrbVariant } from "./NeuralGlassOrb";
 import type { OrbViewProps } from "./useOrbEngine";
 
-/** The one orb whose identity is glass: faceted cage under a refracting shell. */
+/** A violet-amethyst crystal: fractured inner light, refracting shell. */
 const VARIANT: OrbVariant = {
   topology: "facet",
-  palette: ["#173b74", "#8fd8ff", "#ffffff"],
-  accent: "#cfe8ff",
-  glass: "#bfe8ff",
+  palette: ["#2a0d4a", "#d46cff", "#fff6a3"],
+  accent: "#f0c4ff",
+  glass: "#caa3ff",
   nodes: 2200,
   degree: 4,
   breath: 0.01,
