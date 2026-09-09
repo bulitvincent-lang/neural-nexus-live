@@ -130,7 +130,7 @@ export function OrbRow({
             owned={owned}
             active={activeOrb === orb.id}
             busy={pending === orb.id}
-            live={visible.has(orb.id)}
+            live={visible.has(orb.id) && !enlarged}
             hot={hovered === orb.id}
             onHover={(on) => setHovered(on ? orb.id : null)}
             register={register}
