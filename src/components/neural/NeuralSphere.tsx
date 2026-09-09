@@ -437,7 +437,6 @@ export function NeuralSphere({
           uniforms={atmoUniforms}
           transparent
           depthWrite={false}
-          side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
         />
       </mesh>
