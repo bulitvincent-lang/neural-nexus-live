@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { OrbStage } from "@/components/orbs/OrbStage";
 import { OrbThumb } from "@/components/store/OrbThumb";
-import { ORB_PRICE, PAYMENTS_ENABLED, formatPrice } from "@/config/pricing";
+import { ORB_PRICE, formatPrice } from "@/config/pricing";
 import type { Orb, OrbState } from "@/lib/orbs/types";
 
 /**
@@ -13,6 +13,7 @@ export function OrbCard({
   orb,
   state,
   active,
+  busy = false,
   onPreview,
   onUse,
   onBuy,
@@ -20,6 +21,8 @@ export function OrbCard({
   orb: Orb;
   state: OrbState;
   active: boolean;
+  /** true while this orb's payment window is opening — blocks a second click */
+  busy?: boolean;
   onPreview: () => void;
   onUse: () => void;
   onBuy: () => void;
@@ -85,9 +88,10 @@ export function OrbCard({
             <button
               type="button"
               onClick={onBuy}
-              className="rounded-full border border-[#a793ff]/40 px-4 py-2 text-[11px] tracking-wide text-[#e6dcff] transition-colors hover:border-[#a793ff]"
+              disabled={busy}
+              className="rounded-full border border-[#a793ff]/40 px-4 py-2 text-[11px] tracking-wide text-[#e6dcff] transition-colors hover:border-[#a793ff] disabled:opacity-40"
             >
-              {PAYMENTS_ENABLED ? `Buy ${formatPrice(ORB_PRICE)}` : "Notify me"}
+              {busy ? "Opening…" : `Buy ${formatPrice(ORB_PRICE)}`}
             </button>
           )}
         </div>
