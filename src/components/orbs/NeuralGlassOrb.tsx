@@ -451,6 +451,17 @@ export function NeuralGlassOrb({
   const clock = useRef(0);
   const build = useRef(0);
   const extras = useRef<THREE.Group>(null);
+  const amp = useRef(0);
+  const touch = useMemo(
+    () => ({
+      point: new THREE.Vector3(0, 0, 0.9),
+      target: new THREE.Vector3(0, 0, 0.9),
+      ray: new THREE.Ray(),
+      tmp: new THREE.Vector3(),
+      sphere: new THREE.Sphere(new THREE.Vector3(), 0.92),
+    }),
+    [],
+  );
 
   const geo = useMemo(() => {
     const count = Math.max(320, Math.round(variant.nodes * (0.5 + detail * 0.5)));
