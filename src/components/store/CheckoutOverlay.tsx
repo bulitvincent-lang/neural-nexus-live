@@ -13,7 +13,7 @@ export function CheckoutOverlay({
   onClose,
 }: {
   priceId: string;
-  orbId?: string;
+  orbId?: string | undefined;
   title: string;
   returnUrl: string;
   onClose: () => void;

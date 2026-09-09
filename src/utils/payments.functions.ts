@@ -11,7 +11,7 @@ type CheckoutSessionResult = { clientSecret: string } | { error: string };
 
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
-  options: { email?: string; userId?: string },
+  options: { email?: string | undefined; userId?: string | undefined },
 ): Promise<string> {
   if (options.userId && !/^[a-zA-Z0-9_-]+$/.test(options.userId)) {
     throw new Error("Invalid userId");
@@ -49,7 +49,7 @@ async function resolveOrCreateCustomer(
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (data: { priceId: string; returnUrl: string; environment: StripeEnv; orbId?: string }) => {
+    (data: { priceId: string; returnUrl: string; environment: StripeEnv; orbId?: string | undefined }) => {
       if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
       return data;
     },

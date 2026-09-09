@@ -4,10 +4,10 @@ import { createClient } from "@supabase/supabase-js";
 import { ORB_BY_PRICE_ID } from "@/config/pricing";
 import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
 
-let _supabase: ReturnType<typeof createClient> | null = null;
+let _supabase: ReturnType<typeof createClient<any>> | null = null;
 function getSupabase() {
   if (!_supabase) {
-    _supabase = createClient(
+    _supabase = createClient<any>(
       process.env["SUPABASE_URL"]!,
       process.env["SUPABASE_SERVICE_ROLE_KEY"]!,
     );

@@ -21,7 +21,7 @@ import type { OrbId } from "@/lib/orbs/types";
 
 export const Route = createFileRoute("/store")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>): { session_id?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { session_id?: string | undefined } => ({
     session_id: typeof search["session_id"] === "string" ? (search["session_id"] as string) : undefined,
   }),
   head: () => ({
@@ -50,7 +50,7 @@ function StorePage() {
   const [previewId, setPreviewId] = useState<OrbId | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [pending, setPending] = useState<OrbId | "subscription" | null>(null);
-  const [checkout, setCheckout] = useState<{ priceId: string; orbId?: OrbId; title: string } | null>(
+  const [checkout, setCheckout] = useState<{ priceId: string; orbId?: OrbId | undefined; title: string } | null>(
     null,
   );
 
