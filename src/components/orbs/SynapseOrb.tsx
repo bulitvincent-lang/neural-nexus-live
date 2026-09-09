@@ -24,7 +24,7 @@ void main() {
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   float alive = smoothstep(uGrowth, uGrowth - 0.12, aGrow);
   float breathe = 0.62 + 0.38 * sin(uTime * (0.9 + aSeed) + aSeed * 9.0);
-  vA = alive * (0.16 + 0.5 * uActivity + 0.14 * breathe) * (1.15 - aDepth * 0.5);
+  vA = alive * (0.26 + 0.6 * uActivity + 0.18 * breathe) * (1.15 - aDepth * 0.45);
   vDepth = aDepth;
 }
 `;
@@ -93,7 +93,7 @@ function buildDendrites(trunks: number, maxDepth: number) {
         Math.random() - 0.5,
         Math.random() - 0.5,
         Math.random() - 0.5,
-      ).multiplyScalar(0.85);
+      ).multiplyScalar(0.55);
       const next = dir.clone().add(jitter).normalize();
       grow(to, next, depth + 1, idx);
     }
@@ -104,7 +104,7 @@ function buildDendrites(trunks: number, maxDepth: number) {
     const th = (i / trunks) * Math.PI * 2 + Math.random() * 0.5;
     const r = Math.sqrt(1 - u * u);
     const dir = new THREE.Vector3(Math.cos(th) * r, u, Math.sin(th) * r).normalize();
-    grow(new THREE.Vector3(0, 0, 0).addScaledVector(dir, 0.08), dir, 0, -1);
+    grow(new THREE.Vector3(0, 0, 0).addScaledVector(dir, 0.05), dir, 0, -1);
   }
 
   segs.forEach((s, i) => {
@@ -120,7 +120,7 @@ export function SynapseOrb({ engineRef, detail = 1 }: OrbViewProps) {
   const growth = useRef(0.35);
 
   const data = useMemo(() => {
-    const segs = buildDendrites(detail < 0.7 ? 7 : 9, detail < 0.7 ? 4 : 5);
+    const segs = buildDendrites(detail < 0.7 ? 9 : 14, detail < 0.7 ? 4 : 5);
     const E = segs.length;
     const pos = new Float32Array(E * 6);
     const grow = new Float32Array(E * 2);
@@ -234,7 +234,22 @@ export function SynapseOrb({ engineRef, detail = 1 }: OrbViewProps) {
   });
 
   return (
-    <group ref={group}>
+    <group ref={group} scale={0.78}>
+      {/* soma: the structure has a living centre */}
+      <mesh>
+        <sphereGeometry args={[0.075, 32, 32]} />
+        <meshBasicMaterial color="#c9ffe6" transparent opacity={0.35} />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[0.16, 24, 24]} />
+        <meshBasicMaterial
+          color="#3ce0a0"
+          transparent
+          opacity={0.14}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
       <lineSegments frustumCulled={false}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[data.pos, 3]} />

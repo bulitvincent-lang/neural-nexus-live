@@ -84,14 +84,18 @@ void main() {
   vec3 v = normalize(vViewW);
   float fres = pow(1.0 - clamp(dot(n, v), 0.0, 1.0), 2.4);
   float lam = clamp(dot(n, normalize(vec3(0.45, 0.7, 0.55))), 0.0, 1.0);
-  vec3 deep = vec3(0.03, 0.16, 0.42);
-  vec3 mid = vec3(0.09, 0.62, 0.86);
-  vec3 crest = vec3(0.62, 1.0, 0.94);
-  vec3 col = mix(deep, mid, lam);
-  col = mix(col, crest, clamp(vDisp * 5.0 + fres * 0.55, 0.0, 1.0));
-  col += crest * fres * (0.22 + uGlow * 0.35);
-  float alpha = 0.30 + fres * 0.5 + lam * 0.22 + uActivity * 0.12;
-  gl_FragColor = vec4(col * (0.55 + uGlow * 0.35), clamp(alpha, 0.0, 0.92));
+  vec3 deep = vec3(0.010, 0.055, 0.20);
+  vec3 mid = vec3(0.03, 0.34, 0.62);
+  vec3 crest = vec3(0.30, 0.86, 0.92);
+  vec3 col = mix(deep, mid, lam * lam);
+  col = mix(col, crest, clamp(vDisp * 3.2, 0.0, 0.75));
+  // sharp specular highlight: reads instantly as a wet surface
+  vec3 h = normalize(normalize(vec3(0.45, 0.7, 0.55)) + v);
+  float spec = pow(clamp(dot(n, h), 0.0, 1.0), 42.0);
+  col += vec3(0.75, 0.95, 1.0) * spec * (0.5 + uGlow * 0.6);
+  col += crest * fres * (0.22 + uGlow * 0.3);
+  float alpha = 0.72 + fres * 0.26;
+  gl_FragColor = vec4(col, clamp(alpha, 0.0, 0.98));
 }
 `;
 
@@ -150,7 +154,7 @@ export function LiquidOrb({ engineRef, detail = 1 }: OrbViewProps) {
   });
 
   return (
-    <group ref={group}>
+    <group ref={group} scale={0.86}>
       <mesh>
         <icosahedronGeometry args={[1, segments]} />
         <shaderMaterial
@@ -158,19 +162,18 @@ export function LiquidOrb({ engineRef, detail = 1 }: OrbViewProps) {
           fragmentShader={FRAG}
           uniforms={uniforms}
           transparent
-          side={THREE.DoubleSide}
-          depthWrite={false}
+          side={THREE.FrontSide}
         />
       </mesh>
       {/* inner body: gives real depth to the liquid */}
-      <mesh scale={0.68}>
-        <icosahedronGeometry args={[1, Math.max(2, segments - 1)]} />
+      <mesh scale={0.56}>
+        <icosahedronGeometry args={[1, Math.max(2, segments - 2)]} />
         <shaderMaterial
           vertexShader={VERT}
           fragmentShader={FRAG}
           uniforms={innerUniforms}
           transparent
-          side={THREE.DoubleSide}
+          side={THREE.FrontSide}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
         />

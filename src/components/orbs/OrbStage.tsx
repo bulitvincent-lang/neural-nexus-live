@@ -2,6 +2,7 @@ import { AdaptiveDpr, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from "@react-three/postprocessing";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import * as THREE from "three";
 
 import { activityBus } from "@/lib/neural/eventBus";
 import type { NeuralEngine } from "@/lib/neural/neuralEngine";
@@ -42,13 +43,13 @@ export function OrbStage({
   detail,
   managed = false,
   interactive = true,
-  bloom = 0.32,
+  bloom = 0.38,
 }: OrbStageProps) {
   const engineRef = useRef<NeuralEngine | null>(null);
   const [visible, setVisible] = useState(true);
   const Orb = RENDERERS[orbId];
-  // previews run in a browser tab next to the whole store: keep them light
-  const quality = detail ?? (mode === "preview" ? 0.5 : 1);
+  // full-fidelity previews; AdaptiveDpr protects weaker machines
+  const quality = detail ?? 1;
 
   useEffect(() => {
     const onVis = () => setVisible(!document.hidden);
@@ -79,11 +80,17 @@ export function OrbStage({
 
   return (
     <Canvas
-      dpr={quality < 0.7 ? [1, 1.25] : [1, 2]}
+      dpr={[1, 2]}
       frameloop={visible ? "always" : "never"}
       camera={camera}
-      performance={{ min: 0.45 }}
-      gl={{ antialias: quality > 0.7, alpha: true, powerPreference: "high-performance" }}
+      performance={{ min: 0.6 }}
+      gl={{
+        antialias: true,
+        alpha: true,
+        powerPreference: "high-performance",
+        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 1.05,
+      }}
       style={{ background: "transparent" }}
     >
       <Suspense fallback={null}>
@@ -96,24 +103,26 @@ export function OrbStage({
           enableDamping
           dampingFactor={0.06}
           rotateSpeed={0.32}
+          autoRotate={mode === "preview"}
+          autoRotateSpeed={0.35}
           minDistance={2.5}
           maxDistance={3.6}
           zoomSpeed={0.25}
         />
       ) : null}
-      <EffectComposer enableNormalPass={false}>
+      <EffectComposer enableNormalPass={false} multisampling={4}>
         <Bloom
           intensity={bloom}
-          luminanceThreshold={0.85}
-          luminanceSmoothing={0.35}
+          luminanceThreshold={0.82}
+          luminanceSmoothing={0.4}
           mipmapBlur
-          radius={0.42}
+          radius={0.5}
         />
         <ToneMapping />
-
-        {quality > 0.7 ? <Noise opacity={0.014} premultiply /> : <></>}
-        <Vignette offset={0.3} darkness={0.65} />
+        <Noise opacity={0.012} premultiply />
+        <Vignette offset={0.28} darkness={0.7} />
       </EffectComposer>
+
     </Canvas>
   );
 }
