@@ -36,7 +36,7 @@ void main() {
   vArm = aArm;
   vType = aType;
   float base = uSize * (core > 0.5 ? 1.5 : dust > 0.5 ? 1.2 : 0.85);
-  gl_PointSize = base * (0.85 + 0.4 * uActivity) * (150.0 / -mv.z);
+  gl_PointSize = base * (0.85 + 0.4 * uActivity) * (95.0 / -mv.z);
 }
 
 `;
@@ -57,7 +57,7 @@ void main() {
   vec3 col = mix(cold, violet, fract(vArm * 0.37));
   if (vType > 0.5 && vType < 1.5) col = mix(warm, vec3(1.0), 0.45);
   if (vType > 1.5) col = mix(violet, cold, 0.5) * 0.7;
-  gl_FragColor = vec4(col * (0.35 + vI * 0.75), a * vI * 0.42);
+  gl_FragColor = vec4(col * (0.55 + vI * 0.6), a * vI * 0.22);
 }
 `;
 
