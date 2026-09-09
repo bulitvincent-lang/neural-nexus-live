@@ -3,7 +3,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import { useOrbEngine, type OrbViewProps } from "./useOrbEngine";
-console.log("NGO module loaded");
+
 
 /**
  * One realistic "neural network under glass" renderer, shared by every paid orb.
@@ -656,7 +656,7 @@ export function NeuralGlassOrb({
     const stt = new Float32Array(sttA);
     const so = new Float32Array(soA);
     const sh = new Float32Array(shA);
-    console.log("SPARK", variant.topology, sp.length / 3, routeCount, starts.length);
+    (window as any).__spark = [...((window as any).__spark ?? []), [variant.topology, sp.length / 3, routeCount]];
 
     const shs = new Float32Array(shsA);
 
