@@ -62,7 +62,7 @@ void main() {
   float strength = 0.3 + proximity * 1.7 + uActivity * 0.6 + pulse * 0.16;
   vStrength = strength;
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  gl_PointSize = (0.8 + strength * 1.4) * (34.0 / -mv.z);
+  gl_PointSize = (0.6 + strength * 0.9) * (16.0 / -mv.z);
   gl_Position = projectionMatrix * mv;
 }
 `;
@@ -78,7 +78,7 @@ void main() {
   float core = smoothstep(0.24, 0.0, d);
   float halo = smoothstep(0.5, 0.05, d);
   vec3 color = mix(uPrimary, uSecondary, core) * (0.8 + vStrength * 1.2);
-  gl_FragColor = vec4(color, halo * min(1.0, 0.35 + vStrength * 0.7));
+  gl_FragColor = vec4(color, halo * min(0.9, 0.22 + vStrength * 0.5));
 }
 `;
 
@@ -88,7 +88,7 @@ varying float vB;
 void main() {
   vB = aBright;
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
-  gl_PointSize = (1.6 + aBright * 2.4) * (34.0 / -mv.z);
+  gl_PointSize = (1.2 + aBright * 1.6) * (18.0 / -mv.z);
   gl_Position = projectionMatrix * mv;
 }
 `;
