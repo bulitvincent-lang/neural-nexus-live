@@ -1,0 +1,10 @@
+REVOKE INSERT, UPDATE, DELETE ON public.subscriptions FROM authenticated;
+REVOKE INSERT, UPDATE, DELETE ON public.user_orbs FROM authenticated;
+REVOKE ALL ON public.subscriptions FROM anon;
+REVOKE ALL ON public.user_orbs FROM anon;
+REVOKE ALL ON public.user_preferences FROM anon;
+GRANT SELECT ON public.subscriptions TO authenticated;
+GRANT SELECT ON public.user_orbs TO authenticated;
+GRANT ALL ON public.subscriptions TO service_role;
+GRANT ALL ON public.user_orbs TO service_role;
+GRANT ALL ON public.user_preferences TO service_role;

@@ -12,7 +12,30 @@ import { createFileRoute } from "@tanstack/react-router";
 
 type Subscriber = (chunk: string) => void;
 
-const subscribers = new Set<Subscriber>();
+/** Subscribers grouped by private channel key: one room per installation. */
+const rooms = new Map<string, Set<Subscriber>>();
+
+/** Simple per-key flood guard (events accepted per second). */
+const rate = new Map<string, { count: number; windowStart: number }>();
+
+function readKey(request: Request): string | null {
+  const key = new URL(request.url).searchParams.get("key");
+  if (!key) return null;
+  const clean = key.replace(/[^a-zA-Z0-9._-]/g, "").slice(0, 64);
+  return clean.length >= 8 ? clean : null;
+}
+
+function allow(key: string, amount: number) {
+  const now = Date.now();
+  const entry = rate.get(key);
+  if (!entry || now - entry.windowStart > 1000) {
+    rate.set(key, { count: amount, windowStart: now });
+    if (rate.size > 5000) rate.clear();
+    return amount <= 48;
+  }
+  entry.count += amount;
+  return entry.count <= 48;
+}
 
 const PHASES = new Set(["request", "result", "error", "notification"]);
 
@@ -47,11 +70,13 @@ export const Route = createFileRoute("/api/public/mcp-activity")({
     handlers: {
       GET: async ({ request }) => {
         const url = new URL(request.url);
+        const key = readKey(request);
         if (url.searchParams.get("stream") !== "1") {
-          return new Response(JSON.stringify({ ok: true, listeners: subscribers.size }), {
+          return new Response(JSON.stringify({ ok: true }), {
             headers: { "content-type": "application/json" },
           });
         }
+        if (!key) return new Response("Missing channel key", { status: 400 });
 
         const encoder = new TextEncoder();
         let push: Subscriber;
@@ -62,14 +87,21 @@ export const Route = createFileRoute("/api/public/mcp-activity")({
               try {
                 controller.enqueue(encoder.encode(chunk));
               } catch {
-                subscribers.delete(push);
+                rooms.get(key)?.delete(push);
               }
             };
-            subscribers.add(push);
+            let room = rooms.get(key);
+            if (!room) {
+              room = new Set();
+              rooms.set(key, room);
+            }
+            room.add(push);
             push(": connected\n\n");
           },
           cancel() {
-            subscribers.delete(push);
+            const room = rooms.get(key);
+            room?.delete(push);
+            if (room && room.size === 0) rooms.delete(key);
           },
         });
 
@@ -83,6 +115,9 @@ export const Route = createFileRoute("/api/public/mcp-activity")({
       },
 
       POST: async ({ request }) => {
+        const key = readKey(request);
+        if (!key) return new Response("Missing channel key", { status: 400 });
+
         let body: unknown;
         try {
           body = await request.json();
@@ -96,9 +131,10 @@ export const Route = createFileRoute("/api/public/mcp-activity")({
 
         const signals = list.slice(0, 64).map(sanitize).filter(Boolean);
         if (signals.length === 0) return new Response("No signals", { status: 400 });
+        if (!allow(key, signals.length)) return new Response("Too many events", { status: 429 });
 
         const frame = `data: ${JSON.stringify({ signals })}\n\n`;
-        for (const push of subscribers) push(frame);
+        for (const push of rooms.get(key) ?? []) push(frame);
 
         return new Response(JSON.stringify({ accepted: signals.length }), {
           headers: { "content-type": "application/json" },

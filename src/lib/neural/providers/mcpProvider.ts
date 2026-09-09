@@ -1,3 +1,4 @@
+import { getChannelKey } from "../channel";
 import { mcpEventType, type McpSignal } from "../mcp/mapping";
 import type { ActivityEmit, ActivityProvider, ProviderState } from "./types";
 
@@ -27,9 +28,15 @@ export class MCPActivityProvider implements ActivityProvider {
   private stopped = false;
 
   constructor(
-    private readonly streamUrl = "/api/public/mcp-activity?stream=1",
+    private readonly streamUrl?: string,
     readonly id = "mcp",
   ) {}
+
+  /** Private per-installation stream: nobody else can read it or write into it. */
+  private resolveStreamUrl() {
+    if (this.streamUrl) return this.streamUrl;
+    return `/api/public/mcp-activity?stream=1&key=${encodeURIComponent(getChannelKey())}`;
+  }
 
   isAvailable() {
     return typeof window !== "undefined";
@@ -97,7 +104,7 @@ export class MCPActivityProvider implements ActivityProvider {
       return;
     }
     try {
-      const source = new EventSource(this.streamUrl);
+      const source = new EventSource(this.resolveStreamUrl());
       this.source = source;
       source.onopen = () => {
         this.state = "live";
