@@ -104,12 +104,13 @@ export function OrbStage({
       <EffectComposer enableNormalPass={false}>
         <Bloom
           intensity={bloom}
-          luminanceThreshold={0.24}
-          luminanceSmoothing={0.5}
+          luminanceThreshold={0.62}
+          luminanceSmoothing={0.35}
           mipmapBlur
-          radius={0.74}
+          radius={0.6}
         />
         <ToneMapping />
+
         {quality > 0.7 ? <Noise opacity={0.014} premultiply /> : <></>}
         <Vignette offset={0.3} darkness={0.65} />
       </EffectComposer>
