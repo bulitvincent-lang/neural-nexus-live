@@ -3,7 +3,6 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import { useOrbEngine, type OrbViewProps } from "./useOrbEngine";
-(window as any).__ngo = "loaded";
 
 
 /**
@@ -657,7 +656,6 @@ export function NeuralGlassOrb({
     const stt = new Float32Array(sttA);
     const so = new Float32Array(soA);
     const sh = new Float32Array(shA);
-    (window as any).__spark = [sp.length / 3, routeCount, count];
 
 
     const shs = new Float32Array(shsA);
