@@ -361,7 +361,7 @@ export function NeuralSphere({
       let target =
         open *
         breathe *
-        (edge.dynamic === 0 ? 0.055 : edge.dynamic > 0.9 ? 0.008 : 0.018) *
+        (edge.dynamic === 0 ? 0.05 : edge.dynamic > 0.9 ? 0.006 : 0.016) *
         1.0;
       target += open * (0.06 * clusterAct + 0.5 * endpoints * (0.3 + 0.7 * p.glowIntensity)) * breathe;
       if (p.disturbance > 0.02 && Math.random() < 0.02 * p.disturbance) target *= 0.15;
@@ -389,7 +389,7 @@ export function NeuralSphere({
 
     uniforms.uTime.value = time;
     uniforms.uActivity.value = p.activityLevel;
-    nodeUniforms.uSize.value = 2.8 + p.glowIntensity * 1.8;
+    nodeUniforms.uSize.value = 3.2 + p.glowIntensity * 2.0;
     pulseUniforms.uSize.value = 3.0 + p.glowIntensity * 2.2;
 
     // ---- natural rotation + the faintest cursor parallax ----

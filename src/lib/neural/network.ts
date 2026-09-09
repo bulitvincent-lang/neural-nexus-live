@@ -64,19 +64,21 @@ export function buildNetwork(nodeCount: number, neighbors: number, clusterCount 
 
   const nodes: NeuralNode[] = [];
   for (let i = 0; i < nodeCount; i++) {
-    const c = i % clusterCount;
+    const c = Math.floor(rand() * clusterCount);
     const seed = clusters[c];
-    const spread = 0.26 + rand() * 0.16;
-    let x = seed.x + gauss() * spread;
-    let y = seed.y + gauss() * spread;
-    let z = seed.z + gauss() * spread;
-    const len = Math.hypot(x, y, z) || 1;
-    // keep everything inside the sphere volume, biased towards the shell
-    const target = Math.min(1, Math.max(0.28, len)) * (0.86 + rand() * 0.14);
-    x = (x / len) * target;
-    y = (y / len) * target;
-    z = (z / len) * target;
-    nodes.push({ x, y, z, radius: target, cluster: c, out: [] });
+    const dl = Math.hypot(seed.x, seed.y, seed.z) || 1;
+    // dense blob around the cluster direction, biased towards the shell
+    const spread = 0.17 + rand() * 0.1;
+    let dx = seed.x / dl + gauss() * spread;
+    let dy = seed.y / dl + gauss() * spread;
+    let dz = seed.z / dl + gauss() * spread;
+    const l = Math.hypot(dx, dy, dz) || 1;
+    dx /= l;
+    dy /= l;
+    dz /= l;
+    const shell = rand() < 0.78;
+    const radius = shell ? 0.82 + rand() * 0.18 : 0.3 + Math.pow(rand(), 0.7) * 0.5;
+    nodes.push({ x: dx * radius, y: dy * radius, z: dz * radius, radius, cluster: c, out: [] });
   }
 
   // k-nearest-neighbour scaffolding
@@ -119,7 +121,10 @@ export function buildNetwork(nodeCount: number, neighbors: number, clusterCount 
         best.sort((p, q) => p.d - q.d);
       }
     }
-    for (const b of best) addEdge(i, b.j);
+    for (const b of best) {
+      if (Math.sqrt(b.d) > 0.38) continue;
+      addEdge(i, b.j);
+    }
   }
 
   // long-range association tracts between clusters (temporary pathways use these)
