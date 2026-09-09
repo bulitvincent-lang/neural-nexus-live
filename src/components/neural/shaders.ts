@@ -60,7 +60,7 @@ void main() {
   float depthFade = mix(1.0, 0.26, vDepth);
   float a = (0.10 + 0.62 * vAct) * (hot * 1.25 + halo * 0.4) * depthFade * vTwinkle;
   vec3 col = mix(vColor, vec3(1.0), hot * (0.25 + 0.5 * vAct));
-  gl_FragColor = vec4(col * (0.42 + 1.25 * vAct), a);
+  gl_FragColor = vec4(col * (0.6 + 1.3 * vAct), a);
 }
 `;
 
@@ -92,7 +92,7 @@ export const EDGE_FRAG = /* glsl */ `
 varying vec3 vColor;
 varying float vAlpha;
 void main() {
-  gl_FragColor = vec4(vColor * (0.7 + 0.6 * vAlpha), vAlpha * 0.52);
+  gl_FragColor = vec4(vColor * (0.8 + 0.7 * vAlpha), vAlpha * 0.62);
 }
 `;
 

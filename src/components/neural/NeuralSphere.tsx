@@ -416,17 +416,6 @@ export function NeuralSphere({
 
   return (
     <group ref={group}>
-      {/* inner light: gives the network a lit core */}
-      <mesh>
-        <sphereGeometry args={[0.16, 32, 32]} />
-        <meshBasicMaterial
-          color="#123a6b"
-          transparent
-          opacity={0.045}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
 
 
 
