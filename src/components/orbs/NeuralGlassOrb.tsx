@@ -102,6 +102,7 @@ uniform vec3 uMain;
 uniform vec3 uHot;
 varying float vI;
 varying float vTint;
+varying float vNear;
 void main() {
   vec2 uv = gl_PointCoord - 0.5;
   float d = length(uv);
@@ -111,6 +112,7 @@ void main() {
   float halo = pow(smoothstep(0.5, 0.0, d), 2.4);
   vec3 col = mix(uDeep, uMain, smoothstep(0.0, 0.6, vTint));
   col = mix(col, uHot, smoothstep(0.62, 1.0, vTint) * vI);
+  col = mix(col, uHot, clamp(vNear, 0.0, 1.0) * 0.7);
   float a = (halo * 0.22 + core * 0.9) * (0.45 + vI * 0.55);
   gl_FragColor = vec4(col * (0.9 + vI * 1.5) + core * 0.45, clamp(a * 1.5, 0.0, 1.0));
 }
@@ -126,26 +128,42 @@ uniform float uActivity;
 uniform float uDensity;
 uniform float uBreath;
 uniform float uBuild;
+uniform vec3 uCursor;
+uniform float uCursorAmp;
+uniform float uWave;
 varying float vI;
 varying float vTint;
 varying float vEnd;
+varying float vNear;
 void main() {
   vec3 dir = normalize(position + 1e-5);
   float r = length(position);
   float rev = smoothstep(aOrder - 0.42, aOrder + 0.05, uBuild);
   float wob = sin(uTime * (0.6 + aSeed * 0.9) + aSeed * 31.0);
   vec3 p = dir * (r * mix(0.9, 1.0, rev) + wob * uBreath * (0.35 + uActivity * 0.9) * rev);
+
+  float cd = length(p - uCursor);
+  float near = exp(-cd * cd * 5.5) * uCursorAmp;
+  float ripple = smoothstep(0.34, 0.0, abs(cd - uWave)) * uCursorAmp;
+  p += dir * near * 0.055;
+
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
 
-  // travelling impulse along the link
-  float phase = fract(uTime * (0.16 + uActivity * 0.6) + aSeed);
+  // travelling impulses along the link, faster and brighter under the cursor
+  float speed = 0.22 + uActivity * 0.7 + near * 0.9;
+  float phase = fract(uTime * speed + aSeed);
   float pulse = smoothstep(0.35, 0.0, abs(phase - aEnd));
+  float second = smoothstep(0.22, 0.0, abs(fract(phase + 0.5) - aEnd));
   float on = max(0.45, step(1.0 - uDensity * 0.95, aSeed));
-  vI = ((0.55 + 0.45 * uActivity) * on + pulse * (0.5 + uActivity * 0.9)) * rev
-     * (0.6 + smoothstep(0.78, 1.0, uBuild) * 0.85);
+  vI = ((0.55 + 0.45 * uActivity) * on
+        + pulse * (0.5 + uActivity * 0.9)
+        + second * 0.35 * (0.3 + uActivity)) * rev
+     * (0.6 + smoothstep(0.78, 1.0, uBuild) * 0.85)
+     + near * 1.4 + ripple * 0.9;
   vTint = aTint;
   vEnd = aEnd;
+  vNear = near + ripple * 0.6;
 }
 `;
 
@@ -154,10 +172,11 @@ uniform vec3 uMain;
 uniform vec3 uAccent;
 varying float vI;
 varying float vTint;
+varying float vNear;
 void main() {
   vec3 col = mix(uMain, uAccent, smoothstep(0.7, 1.0, vTint));
   // additive: brightness comes from rgb * alpha, so keep both meaningful
-  col = mix(col, vec3(1.0), 0.18);
+  col = mix(col, vec3(1.0), 0.18 + clamp(vNear, 0.0, 1.0) * 0.4);
   gl_FragColor = vec4(col * (0.9 + vI * 1.7), clamp(0.3 + vI * 0.9, 0.0, 1.0));
 }
 `;
