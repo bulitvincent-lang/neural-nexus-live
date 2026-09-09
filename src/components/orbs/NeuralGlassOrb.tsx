@@ -59,8 +59,12 @@ uniform float uNode;
 uniform float uBreath;
 uniform float uSize;
 uniform float uBuild;
+uniform vec3 uCursor;
+uniform float uCursorAmp;
+uniform float uWave;
 varying float vI;
 varying float vTint;
+varying float vNear;
 
 void main() {
   vec3 dir = normalize(position + 1e-5);
@@ -69,15 +73,26 @@ void main() {
   float rev = smoothstep(aOrder - 0.42, aOrder + 0.05, uBuild);
   float wob = sin(uTime * (0.6 + aSeed * 0.9) + aSeed * 31.0);
   vec3 p = dir * (r * mix(0.9, 1.0, rev) + wob * uBreath * (0.35 + uActivity * 0.9) * rev);
+
+  // nodes near the cursor lift and light up, like a touched membrane
+  float cd = length(p - uCursor);
+  float near = exp(-cd * cd * 5.5) * uCursorAmp;
+  p += dir * near * 0.055;
+  // a slow luminous ripple sweeping outwards from the cursor
+  float ripple = smoothstep(0.34, 0.0, abs(cd - uWave)) * uCursorAmp;
+
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
 
   float fire = 0.5 + 0.5 * sin(uTime * (1.1 + aSeed * 3.4) + aSeed * 40.0);
   // at rest the orb glows low; hovering makes every node blaze
   vI = mix(0.30, 1.0, fire * (0.35 + uNode * 0.85)) * rev
-     * (0.62 + smoothstep(0.78, 1.0, uBuild) * 0.75);
+     * (0.62 + smoothstep(0.78, 1.0, uBuild) * 0.75)
+     + near * 1.15 + ripple * 0.8;
   vTint = aTint;
-  gl_PointSize = uSize * aScale * (0.8 + 0.55 * uActivity) * (26.0 / -mv.z) * rev;
+  vNear = near + ripple * 0.7;
+  gl_PointSize = uSize * aScale * (0.8 + 0.55 * uActivity) * (1.0 + near * 1.5)
+    * (26.0 / -mv.z) * rev;
 }
 `;
 
