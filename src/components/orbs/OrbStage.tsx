@@ -1,4 +1,4 @@
-import { AdaptiveDpr, OrbitControls } from "@react-three/drei";
+import { AdaptiveDpr, Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from "@react-three/postprocessing";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import { startDefaultProviders } from "@/lib/neural/providers";
 import { runPreviewScript } from "@/lib/orbs/previewScript";
 import type { OrbId } from "@/lib/orbs/types";
 import type { OrbViewProps } from "./useOrbEngine";
+import { PaidOrbAccents } from "./PaidOrbAccents";
 
 /** Every orb shares this contract, so only the selected one is ever loaded. */
 type OrbComponent = React.ComponentType<OrbViewProps>;
@@ -74,13 +75,13 @@ export function OrbStage({
   }, [mode, orbId]);
 
   const camera = useMemo(
-    () => ({ position: [0, 0, 3.05] as [number, number, number], fov: 42 }),
+    () => ({ position: [0, 0, 2.82] as [number, number, number], fov: 42 }),
     [],
   );
 
   return (
     <Canvas
-      dpr={[1, 2]}
+      dpr={interactive ? [1, 2] : [0.85, 1.35]}
       frameloop={visible ? "always" : "never"}
       camera={camera}
       performance={{ min: 0.6 }}
@@ -94,7 +95,18 @@ export function OrbStage({
       style={{ background: "transparent" }}
     >
       <Suspense fallback={null}>
-        <Orb engineRef={engineRef} detail={quality} />
+        <ambientLight intensity={0.22} color="#6b62ff" />
+        <pointLight position={[2.4, 2.8, 3.2]} intensity={7} color="#09d8ff" distance={8} />
+        <pointLight position={[-2.8, -1.4, 1.6]} intensity={5} color="#ff4fd8" distance={7} />
+        <Environment resolution={64}>
+          <Lightformer intensity={2.4} color="#d8f8ff" position={[0, 3, 2]} scale={[4, 1, 1]} />
+          <Lightformer intensity={1.7} color="#6b62ff" position={[-3, 0, 1]} rotation-y={Math.PI / 2} scale={[3, 2, 1]} />
+          <Lightformer intensity={1.2} color="#ffae55" position={[3, -1, 0]} rotation-y={-Math.PI / 2} scale={[2, 1, 1]} />
+        </Environment>
+        <group scale={orbId === "neural" ? 1 : 1.08}>
+          <Orb engineRef={engineRef} detail={quality} />
+          {orbId !== "neural" ? <PaidOrbAccents orbId={orbId} /> : null}
+        </group>
       </Suspense>
       <AdaptiveDpr pixelated={false} />
       {interactive ? (
@@ -110,10 +122,10 @@ export function OrbStage({
           zoomSpeed={0.25}
         />
       ) : null}
-      <EffectComposer enableNormalPass={false} multisampling={4}>
+      <EffectComposer enableNormalPass={false} multisampling={interactive ? 4 : 0}>
         <Bloom
-          intensity={bloom}
-          luminanceThreshold={0.9}
+          intensity={orbId === "neural" ? bloom : bloom}
+          luminanceThreshold={0.82}
           luminanceSmoothing={0.4}
           mipmapBlur
           radius={0.5}

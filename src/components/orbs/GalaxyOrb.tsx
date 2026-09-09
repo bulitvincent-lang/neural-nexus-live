@@ -57,7 +57,7 @@ void main() {
   vec3 col = mix(cold, violet, fract(vArm * 0.37));
   if (vType > 0.5 && vType < 1.5) col = mix(warm, vec3(1.0), 0.45);
   if (vType > 1.5) col = mix(violet, cold, 0.5) * 0.7;
-  gl_FragColor = vec4(col * (0.55 + vI * 0.6), a * vI * 0.22);
+  gl_FragColor = vec4(col * (0.42 + vI * 0.42), a * vI * 0.13);
 }
 `;
 
@@ -123,7 +123,7 @@ export function GalaxyOrb({ engineRef, detail = 1 }: OrbViewProps) {
       uTime: { value: 0 },
       uActivity: { value: 0 },
       uConverge: { value: 0 },
-      uSize: { value: 1.7 },
+      uSize: { value: 1.35 },
     }),
     [],
   );
@@ -138,9 +138,9 @@ export function GalaxyOrb({ engineRef, detail = 1 }: OrbViewProps) {
     uniforms.uTime.value = clock.current;
     uniforms.uActivity.value = p.activityLevel;
     uniforms.uConverge.value = p.convergenceLevel;
-    uniforms.uSize.value = 1.25 + p.glowIntensity * 0.6;
+    uniforms.uSize.value = 1.05 + p.glowIntensity * 0.42;
     if (coreMat.current) {
-      coreMat.current.opacity = 0.05 + p.activityLevel * 0.1 + p.waveStrength * 0.07;
+      coreMat.current.opacity = 0.035 + p.activityLevel * 0.065 + p.waveStrength * 0.04;
     }
 
     if (group.current) {
@@ -175,7 +175,7 @@ export function GalaxyOrb({ engineRef, detail = 1 }: OrbViewProps) {
           ref={coreMat}
           color="#ffe6c0"
           transparent
-          opacity={0.2}
+          opacity={0.1}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />

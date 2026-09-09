@@ -33,8 +33,8 @@ const BRANCH_FRAG = /* glsl */ `
 varying float vA;
 varying float vDepth;
 void main() {
-  vec3 base = vec3(0.42, 0.95, 0.72);
-  vec3 tip = vec3(0.78, 1.0, 0.58);
+  vec3 base = vec3(0.035, 0.85, 1.0);
+  vec3 tip = vec3(1.0, 0.31, 0.85);
   gl_FragColor = vec4(mix(base, tip, vDepth), clamp(vA, 0.0, 0.9));
 }
 `;
@@ -58,7 +58,7 @@ void main() {
   float d = length(uv);
   if (d > 0.5) discard;
   float a = smoothstep(0.5, 0.0, d);
-  vec3 col = mix(vec3(0.55, 1.0, 0.78), vec3(1.0), 0.35 * vE);
+  vec3 col = mix(vec3(0.035, 0.85, 1.0), vec3(1.0, 0.48, 0.92), 0.35 + 0.45 * vE);
   gl_FragColor = vec4(col * (0.55 + vE * 0.5), a * a * clamp(vE, 0.0, 1.0) * 0.55);
 }
 `;
@@ -246,7 +246,7 @@ export function SynapseOrb({ engineRef, detail = 1 }: OrbViewProps) {
       <mesh>
         <sphereGeometry args={[0.06, 24, 24]} />
         <meshBasicMaterial
-          color="#dbfff0"
+          color="#dffbff"
           transparent
           opacity={0.5}
           blending={THREE.AdditiveBlending}
@@ -256,7 +256,7 @@ export function SynapseOrb({ engineRef, detail = 1 }: OrbViewProps) {
       <mesh>
         <sphereGeometry args={[0.1, 24, 24]} />
         <meshBasicMaterial
-          color="#3ce0a0"
+          color="#6b62ff"
           transparent
           opacity={0.14}
           blending={THREE.AdditiveBlending}
