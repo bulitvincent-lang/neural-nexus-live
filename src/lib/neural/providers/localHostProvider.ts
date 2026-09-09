@@ -39,7 +39,9 @@ export class LocalHostProvider implements ActivityProvider {
 
   start(emit: ActivityEmit) {
     this.emit = emit;
-    window.neuralActivity = { report: (signal) => this.emit?.(signal) };
+    window.neuralActivity = {
+      report: (signal) => this.emit?.({ source: "local", ...signal }),
+    };
     this.state = "live";
   }
 
