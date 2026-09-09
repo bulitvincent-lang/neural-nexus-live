@@ -678,7 +678,7 @@ export function NeuralGlassOrb({
       }
     }
 
-    return { count, nodePos, nodeSeed, nodeTint, nodeScale, nodeOrder, lp, ls, le, lt, lo, bp, bs, ba };
+    return { count, nodePos, nodeSeed, nodeTint, nodeScale, nodeOrder, lp, ls, le, lt, lo, bp, bs, ba, sp, sd, ss, stt, so };
   }, [variant, detail]);
 
   const rays = useMemo(() => {
