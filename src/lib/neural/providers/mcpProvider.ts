@@ -16,7 +16,6 @@ import type { ActivityEmit, ActivityProvider, ProviderState } from "./types";
  * product.
  */
 export class MCPActivityProvider implements ActivityProvider {
-  readonly id = "mcp";
   readonly priority = 10;
 
   private emit: ActivityEmit | null = null;
@@ -27,7 +26,10 @@ export class MCPActivityProvider implements ActivityProvider {
   private state: ProviderState = "idle";
   private stopped = false;
 
-  constructor(private readonly streamUrl = "/api/public/mcp-activity?stream=1") {}
+  constructor(
+    private readonly streamUrl = "/api/public/mcp-activity?stream=1",
+    readonly id = "mcp",
+  ) {}
 
   isAvailable() {
     return typeof window !== "undefined";
