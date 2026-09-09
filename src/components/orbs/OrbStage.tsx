@@ -120,7 +120,7 @@ export function OrbStage({
           zoomSpeed={0.25}
         />
       ) : null}
-      <EffectComposer enableNormalPass={false} multisampling={interactive ? 4 : 0}>
+      <EffectComposer enableNormalPass={false} multisampling={0}>
         <Bloom
           intensity={orbId === "neural" ? bloom : bloom}
           luminanceThreshold={0.82}
