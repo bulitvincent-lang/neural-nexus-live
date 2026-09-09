@@ -120,8 +120,23 @@ export class MCPActivityProvider implements ActivityProvider {
     }
   }
 
-  private handle(signal: McpSignal) {
+  private handle(signal: McpSignal & { type?: string; intensity?: number; complexity?: number; parallelTasks?: number }) {
     if (!this.emit) return;
+
+    // A non-MCP host may send a plain normalised type — pass it straight through.
+    if (signal.type) {
+      this.emit({
+        type: signal.type,
+        intensity: signal.intensity,
+        complexity: signal.complexity,
+        parallelTasks: signal.parallelTasks,
+        concurrency: signal.concurrency,
+        size: signal.size,
+        durationMs: signal.durationMs,
+      });
+      return;
+    }
+
 
     if (signal.phase === "request") this.inFlight += 1;
     else if (signal.phase === "result" || signal.phase === "error") {
