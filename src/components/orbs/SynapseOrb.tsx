@@ -252,7 +252,7 @@ export function SynapseOrb({ engineRef, detail = 1 }: OrbViewProps) {
         />
       </mesh>
       <mesh>
-        <sphereGeometry args={[0.16, 24, 24]} />
+        <sphereGeometry args={[0.1, 24, 24]} />
         <meshBasicMaterial
           color="#3ce0a0"
           transparent

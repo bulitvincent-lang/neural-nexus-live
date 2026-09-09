@@ -152,7 +152,7 @@ export function CrystalOrb({ engineRef, detail = 1 }: OrbViewProps) {
         <meshBasicMaterial
           color="#6f6bff"
           transparent
-          opacity={0.16}
+          opacity={0.1}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
