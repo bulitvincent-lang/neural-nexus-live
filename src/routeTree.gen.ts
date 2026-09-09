@@ -10,14 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as OrbRouteImport } from './routes/orb'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as ApiPublicMcpActivityRouteImport } from './routes/api/public/mcp-activity'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectRoute = ConnectRouteImport.update({
@@ -40,49 +47,79 @@ const ApiPublicMcpActivityRoute = ApiPublicMcpActivityRouteImport.update({
   path: '/api/public/mcp-activity',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
   '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
   '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
   '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/connect' | '/orb' | '/store' | '/api/public/mcp-activity'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/connect' | '/orb' | '/store' | '/api/public/mcp-activity'
-  id:
-    | '__root__'
+  fullPaths:
     | '/'
+    | '/auth'
     | '/connect'
     | '/orb'
     | '/store'
     | '/api/public/mcp-activity'
+    | '/api/public/payments/webhook'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/auth'
+    | '/connect'
+    | '/orb'
+    | '/store'
+    | '/api/public/mcp-activity'
+    | '/api/public/payments/webhook'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/connect'
+    | '/orb'
+    | '/store'
+    | '/api/public/mcp-activity'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   ConnectRoute: typeof ConnectRoute
   OrbRoute: typeof OrbRoute
   StoreRoute: typeof StoreRoute
   ApiPublicMcpActivityRoute: typeof ApiPublicMcpActivityRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,6 +129,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connect': {
@@ -122,15 +166,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMcpActivityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   ConnectRoute: ConnectRoute,
   OrbRoute: OrbRoute,
   StoreRoute: StoreRoute,
   ApiPublicMcpActivityRoute: ApiPublicMcpActivityRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

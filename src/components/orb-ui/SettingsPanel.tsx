@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 
 import { SITE, connectorDownloadUrl } from "@/config/site";
-import { useOrbLibrary } from "@/hooks/useOrbLibrary";
+import { useOrbAccount } from "@/hooks/useOrbAccount";
 import type { OrbSettings } from "@/hooks/useOrbSettings";
 import { useI18n } from "@/lib/i18n";
 import { AI_OPTIONS, connectorManager, type AiId } from "@/lib/neural/connectors";
 import { ORBS } from "@/lib/orbs/catalog";
-import { orbState } from "@/lib/orbs/library";
 
 /**
  * Everyday settings, consumer only: my AIs, appearance, application.
@@ -22,7 +21,7 @@ export function SettingsPanel({
   onClose: () => void;
 }) {
   const { t } = useI18n();
-  const { library, setActiveOrb } = useOrbLibrary();
+  const account = useOrbAccount();
   const [, setTick] = useState(0);
   useEffect(() => {
     const off = connectorManager.subscribe(() => setTick((v) => v + 1));
@@ -83,14 +82,14 @@ export function SettingsPanel({
 
         <Section title="My Orbs">
           <div className="flex flex-wrap gap-3">
-            {ORBS.filter((o) => library && orbState(library, o.id, o.included) !== "available").map(
+            {ORBS.filter((o) => o.included || account.orbIds.includes(o.id)).map(
               (o) => {
-                const active = library?.active_orb === o.id;
+                const active = account.activeOrb === o.id;
                 return (
                   <button
                     key={o.id}
                     type="button"
-                    onClick={() => setActiveOrb(o.id)}
+                    onClick={() => account.setActiveOrb(o.id)}
                     title={o.name}
                     className={`h-12 w-12 rounded-full transition ${
                       active ? "ring-2 ring-[#7ceaff]" : "opacity-70 hover:opacity-100"
