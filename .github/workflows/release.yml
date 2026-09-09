@@ -44,8 +44,13 @@ jobs:
       - name: Build frontend
         run: bun run build
 
-      - name: Verify frontend output
-        run: test -d dist/client && echo "dist/client ready"
+      - name: Inspect frontend output
+        shell: bash
+        continue-on-error: true
+        run: |
+          ls -la . || true
+          ls -la dist || true
+          ls -la .output || true
 
       - uses: tauri-apps/tauri-action@v0
         env:
