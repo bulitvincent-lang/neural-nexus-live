@@ -38,7 +38,7 @@ void main() {
   vDepth = clamp((-mv.z - 1.2) / 3.2, 0.0, 1.0);
 
   float size = uSize * (0.55 + 1.5 * aAct) * (0.75 + 0.45 * length(position));
-  gl_PointSize = size * (300.0 / max(0.001, -mv.z));
+  gl_PointSize = size * (3.0 / max(0.001, -mv.z));
 }
 `;
 
@@ -107,7 +107,7 @@ void main() {
   vColor = mix(base, uPalette[3], 0.55);
   vEnergy = aEnergy;
   vDepth = clamp((-mv.z - 1.2) / 3.2, 0.0, 1.0);
-  gl_PointSize = uSize * (0.4 + 1.4 * aEnergy) * (300.0 / max(0.001, -mv.z));
+  gl_PointSize = uSize * (0.4 + 1.4 * aEnergy) * (3.0 / max(0.001, -mv.z));
 }
 `;
 
@@ -137,7 +137,7 @@ void main() {
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
   vFade = mix(1.0, 0.15, clamp((-mv.z - 1.2) / 3.2, 0.0, 1.0));
-  gl_PointSize = uSize * (0.5 + 0.5 * fract(aSeed * 7.3)) * (300.0 / max(0.001, -mv.z));
+  gl_PointSize = uSize * (0.5 + 0.5 * fract(aSeed * 7.3)) * (3.0 / max(0.001, -mv.z));
 }
 `;
 

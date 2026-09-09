@@ -167,12 +167,12 @@ export function NeuralSphere({
   );
 
   const nodeUniforms = useMemo(
-    () => ({ ...uniforms, uSize: { value: 1.5 } }),
+    () => ({ ...uniforms, uSize: { value: 2.6 } }),
     [uniforms],
   );
   const edgeUniforms = useMemo(() => ({ ...uniforms }), [uniforms]);
   const pulseUniforms = useMemo(
-    () => ({ uSize: { value: 2.8 }, uPalette: uniforms.uPalette }),
+    () => ({ uSize: { value: 3.4 }, uPalette: uniforms.uPalette }),
     [uniforms],
   );
   const dustUniforms = useMemo(() => ({ ...uniforms, uSize: { value: 1.1 } }), [uniforms]);
@@ -386,8 +386,8 @@ export function NeuralSphere({
 
     uniforms.uTime.value = time;
     uniforms.uActivity.value = p.activityLevel;
-    nodeUniforms.uSize.value = 1.3 + p.glowIntensity * 0.8;
-    pulseUniforms.uSize.value = 2.4 + p.glowIntensity * 1.4;
+    nodeUniforms.uSize.value = 2.3 + p.glowIntensity * 1.6;
+    pulseUniforms.uSize.value = 3.0 + p.glowIntensity * 2.2;
 
     // ---- natural rotation + the faintest cursor parallax ----
     if (group.current) {
