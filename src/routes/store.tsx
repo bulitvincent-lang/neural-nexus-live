@@ -1,23 +1,29 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { CheckoutOverlay } from "@/components/store/CheckoutOverlay";
 import { OrbCard } from "@/components/store/OrbCard";
 import { OrbPreviewModal } from "@/components/store/OrbPreviewModal";
 import {
   ORB_PRICE,
-  PAYMENTS_ENABLED,
+  ORB_PRICE_IDS,
   SUBSCRIPTION_PRICE,
+  SUBSCRIPTION_PRICE_ID,
   TRIAL_DAYS,
   formatPrice,
 } from "@/config/pricing";
 import { SITE } from "@/config/site";
-import { useOrbLibrary } from "@/hooks/useOrbLibrary";
+import { useOrbAccount } from "@/hooks/useOrbAccount";
 import { ORBS, ORB_BY_ID } from "@/lib/orbs/catalog";
-import { orbState } from "@/lib/orbs/library";
+import { paymentsConfigured } from "@/lib/stripe";
 import type { OrbId } from "@/lib/orbs/types";
 
 export const Route = createFileRoute("/store")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>): { session_id?: string } => ({
+    session_id: typeof search["session_id"] === "string" ? (search["session_id"] as string) : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Orb Store — eight ways to watch your AI | Neural Orb" },
@@ -38,37 +44,124 @@ export const Route = createFileRoute("/store")({
 });
 
 function StorePage() {
-  const { library, setActiveOrb } = useOrbLibrary();
+  const { session_id: sessionId } = Route.useSearch();
+  const navigate = useNavigate();
+  const account = useOrbAccount();
   const [previewId, setPreviewId] = useState<OrbId | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [pending, setPending] = useState<OrbId | "subscription" | null>(null);
+  const [checkout, setCheckout] = useState<{ priceId: string; orbId?: OrbId; title: string } | null>(
+    null,
+  );
 
-  const owned = useMemo(
-    () => (library ? ORBS.filter((o) => orbState(library, o.id, o.included) !== "available") : []),
-    [library],
-  );
-  const available = useMemo(
-    () => (library ? ORBS.filter((o) => orbState(library, o.id, o.included) === "available") : ORBS),
-    [library],
-  );
+  const ownedIds = useMemo(() => new Set(account.orbIds), [account.orbIds]);
+  const owned = ORBS.filter((o) => o.included || ownedIds.has(o.id));
+  const available = ORBS.filter((o) => !o.included && !ownedIds.has(o.id));
+
+  // Coming back from a payment: confirm with the payment provider, then show it.
+  useEffect(() => {
+    if (!sessionId || !account.signedIn) return;
+    let cancelled = false;
+    (async () => {
+      setNotice("Confirming your purchase…");
+      try {
+        await account.restore();
+        if (!cancelled) setNotice("All set — your purchase is on your account.");
+      } catch {
+        if (!cancelled)
+          setNotice(
+            "Your payment went through. It can take a moment to appear — use Restore purchases if needed.",
+          );
+      }
+      navigate({ to: "/store", search: {}, replace: true });
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId, account.signedIn]);
+
+  const startPurchase = (orbId: OrbId, name: string) => {
+    if (pending) return;
+    if (!account.signedIn) {
+      navigate({ to: "/auth", search: { next: "/store" } });
+      return;
+    }
+    if (!paymentsConfigured()) {
+      setNotice("Checkout is not available in this build yet. Nothing has been charged.");
+      return;
+    }
+    const priceId = ORB_PRICE_IDS[orbId];
+    if (!priceId) return;
+    setPending(orbId);
+    setCheckout({ priceId, orbId, title: `${name} · ${formatPrice(ORB_PRICE)} one-time` });
+  };
+
+  const startSubscription = () => {
+    if (pending) return;
+    if (!account.signedIn) {
+      navigate({ to: "/auth", search: { next: "/store" } });
+      return;
+    }
+    if (!paymentsConfigured()) {
+      setNotice("Checkout is not available in this build yet. Nothing has been charged.");
+      return;
+    }
+    setPending("subscription");
+    setCheckout({
+      priceId: SUBSCRIPTION_PRICE_ID,
+      title: `Neural Orb · ${formatPrice(SUBSCRIPTION_PRICE)} / year`,
+    });
+  };
+
+  const closeCheckout = () => {
+    setCheckout(null);
+    setPending(null);
+    setNotice("Payment cancelled — nothing has been charged.");
+  };
+
+  const returnUrl = `${typeof window === "undefined" ? SITE.url : window.location.origin}/store?session_id={CHECKOUT_SESSION_ID}`;
 
   return (
     <div
       className="min-h-screen text-[#eaf2ff]"
       style={{
-        background:
-          "linear-gradient(180deg, #22304f 0%, #1a2540 34%, #151e35 68%, #121a2c 100%)",
+        background: "linear-gradient(180deg, #22304f 0%, #1a2540 34%, #151e35 68%, #121a2c 100%)",
       }}
     >
+      <PaymentTestModeBanner />
+
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 pt-6">
         <Link to="/" className="text-[11px] uppercase tracking-[0.42em] text-[#9db9de]">
           {SITE.name}
         </Link>
-        <Link
-          to="/"
-          className="text-[11px] tracking-wide text-[#9db9de] transition-colors hover:text-[#dcebff]"
-        >
-          Back to the app
-        </Link>
+        <div className="flex items-center gap-4 text-[11px] tracking-wide text-[#9db9de]">
+          {account.signedIn ? (
+            <>
+              <button
+                type="button"
+                onClick={() => void account.restore()}
+                className="transition-colors hover:text-[#dcebff]"
+              >
+                Restore purchases
+              </button>
+              <button
+                type="button"
+                onClick={() => void account.signOut()}
+                className="transition-colors hover:text-[#dcebff]"
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link to="/auth" search={{ next: "/store" }} className="transition-colors hover:text-[#dcebff]">
+              Sign in
+            </Link>
+          )}
+          <Link to="/" className="transition-colors hover:text-[#dcebff]">
+            Back to the app
+          </Link>
+        </div>
       </header>
 
       <section className="mx-auto max-w-6xl px-6 pb-10 pt-16">
@@ -80,14 +173,25 @@ function StorePage() {
           Neural comes with your {formatPrice(SUBSCRIPTION_PRICE)} / year subscription. Any other orb
           is {formatPrice(ORB_PRICE)}, once, yours for good.
         </p>
-        {!PAYMENTS_ENABLED && (
+        {!account.signedIn && !account.loading ? (
           <p className="mt-4 max-w-xl text-[11px] leading-relaxed text-[#8ba4c4]">
-            Checkout opens shortly. Until then every orb can be tried free, as long as you like.
+            Sign in before buying so your orbs follow you on every computer.
           </p>
-        )}
+        ) : null}
+        {account.signedIn && !account.subscriptionActive ? (
+          <button
+            type="button"
+            onClick={startSubscription}
+            disabled={pending === "subscription"}
+            className="mt-6 rounded-full border border-[#7ceaff]/40 px-6 py-3 text-[12px] tracking-wide text-[#dcebff] transition-colors hover:border-[#7ceaff] disabled:opacity-40"
+          >
+            {pending === "subscription"
+              ? "Opening…"
+              : `Start Neural Orb — ${formatPrice(SUBSCRIPTION_PRICE)} / year`}
+          </button>
+        ) : null}
       </section>
 
-      {/* My Orbs */}
       <section className="mx-auto max-w-6xl px-6 pb-4">
         <h2 className="text-[11px] uppercase tracking-[0.32em] text-[#8ba4c4]">My Orbs</h2>
         <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -95,17 +199,19 @@ function StorePage() {
             <OrbCard
               key={orb.id}
               orb={orb}
-              state={library ? orbState(library, orb.id, orb.included) : "available"}
-              active={library?.active_orb === orb.id}
+              state={orb.included ? "included" : "owned"}
+              active={account.activeOrb === orb.id}
               onPreview={() => setPreviewId(orb.id)}
-              onUse={() => setActiveOrb(orb.id)}
+              onUse={() => {
+                account.setActiveOrb(orb.id);
+                setNotice(`${orb.name} is now your live orb.`);
+              }}
               onBuy={() => undefined}
             />
           ))}
         </div>
       </section>
 
-      {/* Available */}
       <section className="mx-auto max-w-6xl px-6 pb-24 pt-12">
         <h2 className="text-[11px] uppercase tracking-[0.32em] text-[#8ba4c4]">
           Available · {formatPrice(ORB_PRICE)} each, one-time
@@ -117,15 +223,10 @@ function StorePage() {
               orb={orb}
               state="available"
               active={false}
+              busy={pending === orb.id}
               onPreview={() => setPreviewId(orb.id)}
               onUse={() => undefined}
-              onBuy={() =>
-                setNotice(
-                  PAYMENTS_ENABLED
-                    ? null
-                    : `${orb.name} will be purchasable as soon as checkout opens. Nothing has been charged.`,
-                )
-              }
+              onBuy={() => startPurchase(orb.id, orb.name)}
             />
           ))}
         </div>
@@ -147,6 +248,16 @@ function StorePage() {
             OK
           </button>
         </div>
+      ) : null}
+
+      {checkout ? (
+        <CheckoutOverlay
+          priceId={checkout.priceId}
+          orbId={checkout.orbId}
+          title={checkout.title}
+          returnUrl={returnUrl}
+          onClose={closeCheckout}
+        />
       ) : null}
 
       {previewId ? (
