@@ -24,14 +24,21 @@ function sanitize(raw: unknown) {
   const str = (v: unknown) => (typeof v === "string" ? v.slice(0, 120) : undefined);
 
   return {
+    // MCP-shaped fields
     method: str(r["method"]),
     name: str(r["name"]),
     phase: PHASES.has(String(r["phase"])) ? (r["phase"] as string) : undefined,
+    // generic normalised fields (any non-MCP host)
+    type: str(r["type"]),
+    intensity: num(r["intensity"], 1),
+    complexity: num(r["complexity"], 1),
+    parallelTasks: num(r["parallelTasks"], 12),
     concurrency: num(r["concurrency"], 64),
     size: num(r["size"], 50_000_000),
     durationMs: num(r["durationMs"], 600_000),
   };
 }
+
 
 export const Route = createFileRoute("/api/public/mcp-activity")({
   server: {
