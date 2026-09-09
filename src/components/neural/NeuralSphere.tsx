@@ -5,10 +5,8 @@ import * as THREE from "three";
 import { buildNetwork } from "@/lib/neural/network";
 import { NeuralEngine } from "@/lib/neural/neuralEngine";
 import type { QualityProfile } from "@/lib/neural/types";
-import { PALETTE, PALETTE_FLAT } from "./palette";
+import { PALETTE_FLAT } from "./palette";
 import {
-  ATMO_FRAG,
-  ATMO_VERT,
   DUST_FRAG,
   DUST_VERT,
   EDGE_FRAG,
@@ -182,15 +180,6 @@ export function NeuralSphere({
     [uniforms],
   );
   const dustUniforms = useMemo(() => ({ ...uniforms, uSize: { value: 1.1 } }), [uniforms]);
-  const atmoUniforms = useMemo(
-    () => ({
-      uTime: uniforms.uTime,
-      uActivity: uniforms.uActivity,
-      uInner: { value: PALETTE[0].clone() },
-      uRim: { value: PALETTE[1].clone() },
-    }),
-    [uniforms],
-  );
 
 
   const nodeGeo = useRef<THREE.BufferGeometry>(null);
