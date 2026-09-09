@@ -448,9 +448,9 @@ export function NeuralGlassOrb({
           const k = s / SEG;
           const base = a.clone().lerp(z, k);
           const bow = Math.sin(k * Math.PI);
-          base.addScaledVector(off, bow * 0.18 * (0.4 + seed));
+          base.addScaledVector(off, bow * 0.06 * (0.4 + seed));
           base.add(
-            new THREE.Vector3(br() - 0.5, br() - 0.5, br() - 0.5).multiplyScalar(bow * 0.09),
+            new THREE.Vector3(br() - 0.5, br() - 0.5, br() - 0.5).multiplyScalar(bow * 0.035),
           );
           path.push(base);
         }
@@ -496,7 +496,7 @@ export function NeuralGlassOrb({
       const r = 1.18 + rnd() * 0.22;
       return {
         p: [d.x * r, d.y * r * 0.7, d.z * r] as [number, number, number],
-        s: 0.012 + rnd() * 0.022,
+        s: 0.006 + rnd() * 0.009,
       };
     });
   }, [variant.satellites]);
@@ -701,7 +701,13 @@ export function NeuralGlassOrb({
       {satellites?.map((s, i) => (
         <mesh key={i} position={s.p} scale={s.s}>
           <sphereGeometry args={[1, 10, 10]} />
-          <meshBasicMaterial color={i % 3 === 0 ? variant.accent : variant.palette[1]} />
+          <meshBasicMaterial
+            color={i % 3 === 0 ? variant.accent : variant.palette[1]}
+            transparent
+            opacity={0.7}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
         </mesh>
       ))}
     </group>

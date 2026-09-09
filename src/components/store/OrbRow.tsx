@@ -45,7 +45,7 @@ export function OrbRow({
         if (max > 4) {
           // resync if the user scrolled by hand
           if (Math.abs(track.scrollLeft - pos) > 2) pos = track.scrollLeft;
-          pos += dir * dt * 0.03;
+          pos += dir * dt * 0.055;
           if (pos >= max) {
             pos = max;
             dir = -1;
