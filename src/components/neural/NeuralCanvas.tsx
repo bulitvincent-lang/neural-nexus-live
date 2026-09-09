@@ -4,8 +4,8 @@ import { Bloom, EffectComposer, ToneMapping, Vignette } from "@react-three/postp
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { activityBus } from "@/lib/neural/eventBus";
-import { McpActivityAdapter } from "@/lib/neural/mcp/mcpAdapter";
-import { MockActivityAdapter } from "@/lib/neural/mockActivity";
+import { startDefaultProviders } from "@/lib/neural/providers";
+
 
 import type { NeuralEngine } from "@/lib/neural/neuralEngine";
 import { QUALITY_PROFILES, type QualityLevel } from "@/lib/neural/types";
@@ -36,20 +36,9 @@ export function NeuralCanvas() {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
-  // Real MCP activity (tool calls, resource reads, sampling) -> sphere.
-  useEffect(() => {
-    const mcp = new McpActivityAdapter();
-    mcp.start(activityBus);
-    return () => mcp.stop();
-  }, []);
+  // Providers -> Local Activity Bridge -> Event Bus. No host is hardcoded.
+  useEffect(() => startDefaultProviders(), []);
 
-  // Mock activity: development only, no visible surface.
-  useEffect(() => {
-    if (!import.meta.env.DEV) return;
-    const mock = new MockActivityAdapter();
-    mock.start(activityBus);
-    return () => mock.stop();
-  }, []);
 
 
   const quality = QUALITY_PROFILES[level];

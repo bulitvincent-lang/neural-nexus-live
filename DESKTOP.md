@@ -47,3 +47,21 @@ Useful additions in `src-tauri/src/main.rs`:
 - autostart via `tauri-plugin-autostart`.
 
 Rendering pauses when the window is hidden and the engine drops to near-zero work when the AI is idle.
+
+## Activity architecture (host-agnostic, V1)
+
+```
+AI / Agent -> Host / Provider -> Provider Adapter -> Local Activity Bridge
+           -> Event Bus -> NeuralEngine -> Neural Sphere
+```
+
+- `src/lib/neural/providers/types.ts` — `ActivityProvider` contract (id, priority, isAvailable, start(emit), stop, getState).
+- `src/lib/neural/providers/normalize.ts` — loose signals + aliases (STREAMING, THINKING, TOOL_RESULT, DONE, ...) -> canonical events.
+- `src/lib/neural/bridge.ts` — `LocalActivityBridge`: the only thing that writes to the event bus (normalises, rate-limits, queues bursts).
+- `src/lib/neural/providers/mockProvider.ts` — simulator, dev only.
+- `src/lib/neural/providers/mcpProvider.ts` — MCP adapter, no host hardcoded. Channels: `window.neuralMCP.report()`, Tauri event `ai-activity`, local SSE bridge.
+- `src/lib/neural/providers/localHostProvider.ts` — generic bridge: `window.neuralActivity.report({ type: "STREAMING" })`.
+- `src/routes/api/public/mcp-activity.ts` — local HTTP ingest (POST) + SSE fan-out; accepts MCP-shaped or plain normalised signals.
+
+Adding an integration = write a provider and `activityBridge.register(...)` in
+`src/lib/neural/providers/index.ts`. The NeuralEngine never changes.
