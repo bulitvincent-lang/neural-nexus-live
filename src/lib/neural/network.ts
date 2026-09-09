@@ -123,7 +123,7 @@ export function buildNetwork(nodeCount: number, neighbors: number, clusterCount 
   }
 
   // long-range association tracts between clusters (temporary pathways use these)
-  const tracts = Math.round(nodeCount * 0.32);
+  const tracts = Math.round(nodeCount * 0.09);
   for (let t = 0; t < tracts; t++) {
     const a = Math.floor(rand() * nodeCount);
     const b = Math.floor(rand() * nodeCount);

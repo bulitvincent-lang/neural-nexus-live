@@ -72,7 +72,7 @@ export function NeuralCanvas() {
         zoomSpeed={0.25}
       />
       <EffectComposer enableNormalPass={false}>
-        <Bloom intensity={quality.bloom * 0.5} luminanceThreshold={0.42} luminanceSmoothing={0.4} mipmapBlur radius={0.7} />
+        <Bloom intensity={quality.bloom * 0.62} luminanceThreshold={0.32} luminanceSmoothing={0.4} mipmapBlur radius={0.7} />
         <ToneMapping />
         <Vignette offset={0.32} darkness={0.62} />
       </EffectComposer>

@@ -17,6 +17,9 @@ import {
   PULSE_VERT,
 } from "./shaders";
 
+/** Cluster -> palette index: cold hues dominate, amber only once. */
+const TONE_BY_CLUSTER = [0, 1, 2, 4, 1, 0, 2, 5, 4];
+
 /** CPU mirror of the GLSL displace() so pulses ride exactly on the edges. */
 function displace(
   out: THREE.Vector3,
@@ -65,7 +68,7 @@ export function NeuralSphere({
       nodePos[i * 3 + 1] = n.y;
       nodePos[i * 3 + 2] = n.z;
       nodeSeed[i] = (i * 0.6180339887) % 1;
-      nodeCluster[i] = n.cluster;
+      nodeCluster[i] = TONE_BY_CLUSTER[n.cluster % TONE_BY_CLUSTER.length];
       nodeRadius[i] = n.radius;
       nodeAct[i] = 0.03;
     }
@@ -358,7 +361,7 @@ export function NeuralSphere({
       let target =
         open *
         breathe *
-        (edge.dynamic === 0 ? 0.055 : 0.02) *
+        (edge.dynamic === 0 ? 0.055 : edge.dynamic > 0.9 ? 0.008 : 0.018) *
         1.0;
       target += open * (0.06 * clusterAct + 0.5 * endpoints * (0.3 + 0.7 * p.glowIntensity)) * breathe;
       if (p.disturbance > 0.02 && Math.random() < 0.02 * p.disturbance) target *= 0.15;
@@ -386,7 +389,7 @@ export function NeuralSphere({
 
     uniforms.uTime.value = time;
     uniforms.uActivity.value = p.activityLevel;
-    nodeUniforms.uSize.value = 2.3 + p.glowIntensity * 1.6;
+    nodeUniforms.uSize.value = 2.8 + p.glowIntensity * 1.8;
     pulseUniforms.uSize.value = 3.0 + p.glowIntensity * 2.2;
 
     // ---- natural rotation + the faintest cursor parallax ----
@@ -402,8 +405,8 @@ export function NeuralSphere({
     <group ref={group}>
       {/* inner light: gives the network a lit core */}
       <mesh>
-        <sphereGeometry args={[0.28, 32, 32]} />
-        <meshBasicMaterial color="#0d2647" transparent opacity={0.18} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <sphereGeometry args={[0.22, 32, 32]} />
+        <meshBasicMaterial color="#0d2647" transparent opacity={0.07} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
 
       <lineSegments frustumCulled={false}>
