@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { SITE, connectorDownloadUrl } from "@/config/site";
-import { LanguageSwitcher, useI18n } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { AI_OPTIONS, aiOption, connectorManager, type AiId } from "@/lib/neural/connectors";
 
 /**
@@ -42,7 +42,6 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
     <div className="pointer-events-auto fixed inset-0 z-20 flex items-center justify-center bg-[#0a1223]/85 backdrop-blur-md">
       <div className="w-[min(560px,92vw)] rounded-3xl border border-white/10 bg-white/[0.05] p-8 text-center shadow-2xl">
         <div className="mb-6 flex justify-center">
-          <LanguageSwitcher />
         </div>
         {step === "pick" ? (
           <>

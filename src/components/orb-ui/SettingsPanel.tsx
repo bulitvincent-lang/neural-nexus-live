@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { connectorDownloadUrl } from "@/config/site";
 import type { OrbSettings } from "@/hooks/useOrbSettings";
-import { LanguageSwitcher, useI18n } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { AI_OPTIONS, connectorManager, type AiId } from "@/lib/neural/connectors";
 
 /**
@@ -119,9 +119,7 @@ export function SettingsPanel({
           />
         </Section>
 
-        <Section title={t("set.language")}>
-          <LanguageSwitcher />
-        </Section>
+
 
         <button
           type="button"
