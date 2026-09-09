@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as OrbRouteImport } from './routes/orb'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as ApiPublicMcpActivityRouteImport } from './routes/api/public/mcp-activity'
@@ -36,6 +37,11 @@ const ConnectRoute = ConnectRouteImport.update({
 const OrbRoute = OrbRouteImport.update({
   id: '/orb',
   path: '/orb',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/connect'
     | '/orb'
+    | '/pricing'
     | '/privacy'
     | '/store'
     | '/api/public/mcp-activity'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/connect'
     | '/orb'
+    | '/pricing'
     | '/privacy'
     | '/store'
     | '/api/public/mcp-activity'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/connect'
     | '/orb'
+    | '/pricing'
     | '/privacy'
     | '/store'
     | '/api/public/mcp-activity'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ConnectRoute: typeof ConnectRoute
   OrbRoute: typeof OrbRoute
+  PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   StoreRoute: typeof StoreRoute
   ApiPublicMcpActivityRoute: typeof ApiPublicMcpActivityRoute
@@ -163,6 +176,13 @@ declare module '@tanstack/react-router' {
       path: '/orb'
       fullPath: '/orb'
       preLoaderRoute: typeof OrbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ConnectRoute: ConnectRoute,
   OrbRoute: OrbRoute,
+  PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   StoreRoute: StoreRoute,
   ApiPublicMcpActivityRoute: ApiPublicMcpActivityRoute,
