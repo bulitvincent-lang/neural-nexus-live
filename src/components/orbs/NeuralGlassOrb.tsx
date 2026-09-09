@@ -843,12 +843,22 @@ export function NeuralGlassOrb({
     amp.current += (ampTarget - amp.current) * (1 - Math.exp(-5 * dt));
     nodeU.uCursor.value.copy(touch.point);
     linkU.uCursor.value.copy(touch.point);
+    sparkU.uCursor.value.copy(touch.point);
     nodeU.uCursorAmp.value = amp.current;
     linkU.uCursorAmp.value = amp.current;
+    sparkU.uCursorAmp.value = amp.current;
     // luminous ripple radius, expanding away from the focus point
     const wave = ((t * 0.55) % 2.2) - 0.2;
     nodeU.uWave.value = wave;
     linkU.uWave.value = wave;
+    sparkU.uWave.value = wave;
+
+    sparkU.uTime.value = t;
+    sparkU.uActivity.value = p.activityLevel;
+    sparkU.uEnergy.value = hover;
+    sparkU.uBuild.value = b;
+
+
 
     nodeU.uTime.value = t;
     nodeU.uActivity.value = p.activityLevel;
