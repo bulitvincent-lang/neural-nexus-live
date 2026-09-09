@@ -27,9 +27,15 @@ export class MCPActivityProvider implements ActivityProvider {
   private stopped = false;
 
   constructor(
-    private readonly streamUrl = "/api/public/mcp-activity?stream=1",
+    private readonly streamUrl?: string,
     readonly id = "mcp",
   ) {}
+
+  /** Private per-installation stream: nobody else can read it or write into it. */
+  private resolveStreamUrl() {
+    if (this.streamUrl) return this.streamUrl;
+    return `/api/public/mcp-activity?stream=1&key=${encodeURIComponent(getChannelKey())}`;
+  }
 
   isAvailable() {
     return typeof window !== "undefined";
