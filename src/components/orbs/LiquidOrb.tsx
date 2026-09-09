@@ -1,185 +1,21 @@
-import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
-import * as THREE from "three";
+import { NeuralGlassOrb, type OrbVariant } from "./NeuralGlassOrb";
+import type { OrbViewProps } from "./useOrbEngine";
 
-import { useOrbEngine, type OrbViewProps } from "./useOrbEngine";
+const VARIANT: OrbVariant = {
+  topology: "membrane",
+  palette: ["#0a3a5c", "#22e0ff", "#d9fbff"],
+  accent: "#ffc06a",
+  glass: "#5fe6ff",
+  nodes: 2600,
+  degree: 4,
+  breath: 0.055,
+  spin: 0.04,
+  rim: 1.35,
+  coreSize: 0.34,
+};
 
-const NOISE = /* glsl */ `
-vec3 hash3(vec3 p){
-  p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
-  return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
-}
-float snoise(vec3 p){
-  vec3 i = floor(p); vec3 f = fract(p);
-  vec3 u = f * f * (3.0 - 2.0 * f);
-  return mix(mix(mix(dot(hash3(i + vec3(0,0,0)), f - vec3(0,0,0)),
-                     dot(hash3(i + vec3(1,0,0)), f - vec3(1,0,0)), u.x),
-                 mix(dot(hash3(i + vec3(0,1,0)), f - vec3(0,1,0)),
-                     dot(hash3(i + vec3(1,1,0)), f - vec3(1,1,0)), u.x), u.y),
-             mix(mix(dot(hash3(i + vec3(0,0,1)), f - vec3(0,0,1)),
-                     dot(hash3(i + vec3(1,0,1)), f - vec3(1,0,1)), u.x),
-                 mix(dot(hash3(i + vec3(0,1,1)), f - vec3(0,1,1)),
-                     dot(hash3(i + vec3(1,1,1)), f - vec3(1,1,1)), u.x), u.y), u.z);
-}
-`;
-
-const VERT = /* glsl */ `
-${NOISE}
-uniform float uTime;
-uniform float uActivity;
-uniform float uTurbulence;
-uniform float uVortex;
-uniform float uWave;
-uniform float uWaveRadius;
-varying vec3 vNormalW;
-varying vec3 vViewW;
-varying float vDisp;
-varying vec3 vPos;
-
-vec3 fluid(vec3 n) {
-  // vortex twist around Y, stronger near the equator
-  float tw = uVortex * (1.0 - abs(n.y)) * 1.4;
-  float a = tw * 1.6 + uTime * (0.25 + uVortex);
-  float c = cos(a), s = sin(a);
-  vec3 q = vec3(n.x * c - n.z * s, n.y, n.x * s + n.z * c);
-  float t = uTime * (0.35 + 0.9 * uActivity);
-  float d = 0.0;
-  d += snoise(q * 1.7 + vec3(0.0, t * 0.6, 0.0)) * 0.55;
-  d += snoise(q * 3.6 - vec3(t * 0.4, 0.0, t * 0.2)) * 0.28;
-  d += snoise(q * 7.4 + vec3(t * 0.8)) * 0.13 * uTurbulence;
-  // travelling internal wave
-  d += uWave * smoothstep(0.22, 0.0, abs(length(n) * 1.0 - uWaveRadius)) * 0.5;
-  return n * (1.0 + d * (0.05 + 0.13 * uTurbulence)) + vec3(0.0, d * 0.01, 0.0);
-}
-
-void main() {
-  vec3 n = normalize(position);
-  vec3 p = fluid(n);
-  // recompute a smooth normal from two neighbours
-  vec3 t1 = normalize(cross(n, vec3(0.0, 1.0, 0.0) + vec3(0.001)));
-  vec3 t2 = normalize(cross(n, t1));
-  vec3 pa = fluid(normalize(n + t1 * 0.03));
-  vec3 pb = fluid(normalize(n + t2 * 0.03));
-  vec3 nrm = normalize(cross(pa - p, pb - p));
-  if (dot(nrm, n) < 0.0) nrm = -nrm;
-
-  vDisp = length(p) - 1.0;
-  vPos = p;
-  vNormalW = normalize(normalMatrix * nrm);
-  vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  vViewW = -mv.xyz;
-  gl_Position = projectionMatrix * mv;
-}
-`;
-
-const FRAG = /* glsl */ `
-uniform float uActivity;
-uniform float uGlow;
-varying vec3 vNormalW;
-varying vec3 vViewW;
-varying float vDisp;
-varying vec3 vPos;
-void main() {
-  vec3 n = normalize(vNormalW);
-  vec3 v = normalize(vViewW);
-  float fres = pow(1.0 - clamp(dot(n, v), 0.0, 1.0), 2.4);
-  float lam = clamp(dot(n, normalize(vec3(0.45, 0.7, 0.55))), 0.0, 1.0);
-  vec3 deep = vec3(0.010, 0.055, 0.20);
-  vec3 mid = vec3(0.03, 0.34, 0.62);
-  vec3 crest = vec3(0.30, 0.86, 0.92);
-  vec3 col = mix(deep, mid, lam * lam);
-  col = mix(col, crest, clamp(vDisp * 3.2, 0.0, 0.75));
-  // sharp specular highlight: reads instantly as a wet surface
-  vec3 h = normalize(normalize(vec3(0.45, 0.7, 0.55)) + v);
-  float spec = pow(clamp(dot(n, h), 0.0, 1.0), 42.0);
-  col += vec3(0.75, 0.95, 1.0) * spec * (0.5 + uGlow * 0.6);
-  col += crest * fres * (0.22 + uGlow * 0.3);
-  float alpha = 0.72 + fres * 0.26;
-  gl_FragColor = vec4(col, clamp(alpha, 0.0, 0.98));
-}
-`;
-
-export function LiquidOrb({ engineRef, detail = 1 }: OrbViewProps) {
-  const engine = useOrbEngine(engineRef, 8);
-  const group = useRef<THREE.Group>(null);
-  const clock = useRef(0);
-
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uActivity: { value: 0 },
-      uTurbulence: { value: 0 },
-      uVortex: { value: 0 },
-      uWave: { value: 0 },
-      uWaveRadius: { value: 2 },
-      uGlow: { value: 0.4 },
-    }),
-    [],
-  );
-
-  const innerUniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uActivity: { value: 0 },
-      uTurbulence: { value: 0 },
-      uVortex: { value: 0 },
-      uWave: { value: 0 },
-      uWaveRadius: { value: 2 },
-      uGlow: { value: 0.4 },
-    }),
-    [],
-  );
-
-  const segments = detail < 0.7 ? 4 : 6;
-
-  useFrame((_, delta) => {
-    const dt = Math.min(delta, 0.05);
-    clock.current += dt;
-    engine.update(dt);
-    const p = engine.params;
-    for (const u of [uniforms, innerUniforms]) {
-      u.uTime.value = clock.current;
-      u.uActivity.value = p.activityLevel;
-      u.uTurbulence.value = 0.15 + p.activityLevel * 1.1 + p.disturbance * 0.6;
-      u.uVortex.value = 0.08 + p.networkEntropy * 0.6 + p.convergenceLevel * 0.7;
-      u.uWave.value = p.waveStrength;
-      u.uWaveRadius.value = p.waveRadius;
-      u.uGlow.value = p.glowIntensity;
-    }
-    innerUniforms.uTime.value = clock.current * 1.35 + 12;
-    if (group.current) {
-      group.current.rotation.y += dt * (0.05 + p.rotationSpeed * 0.8);
-      group.current.rotation.z = Math.sin(clock.current * 0.06) * 0.08;
-    }
-  });
-
-  return (
-    <group ref={group} scale={0.86}>
-      <mesh>
-        <icosahedronGeometry args={[1, segments]} />
-        <shaderMaterial
-          vertexShader={VERT}
-          fragmentShader={FRAG}
-          uniforms={uniforms}
-          transparent
-          side={THREE.FrontSide}
-        />
-      </mesh>
-      {/* inner body: gives real depth to the liquid */}
-      <mesh scale={0.56}>
-        <icosahedronGeometry args={[1, Math.max(2, segments - 2)]} />
-        <shaderMaterial
-          vertexShader={VERT}
-          fragmentShader={FRAG}
-          uniforms={innerUniforms}
-          transparent
-          side={THREE.FrontSide}
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-    </group>
-  );
+export function LiquidOrb(props: OrbViewProps) {
+  return <NeuralGlassOrb {...props} variant={VARIANT} />;
 }
 
 export default LiquidOrb;

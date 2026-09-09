@@ -1,4 +1,4 @@
-import { AdaptiveDpr, Environment, Lightformer, OrbitControls } from "@react-three/drei";
+import { Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from "@react-three/postprocessing";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
@@ -10,7 +10,6 @@ import { startDefaultProviders } from "@/lib/neural/providers";
 import { runPreviewScript } from "@/lib/orbs/previewScript";
 import type { OrbId } from "@/lib/orbs/types";
 import type { OrbViewProps } from "./useOrbEngine";
-import { PaidOrbAccents } from "./PaidOrbAccents";
 
 /** Every orb shares this contract, so only the selected one is ever loaded. */
 type OrbComponent = React.ComponentType<OrbViewProps>;
@@ -85,6 +84,7 @@ export function OrbStage({
       frameloop={visible ? "always" : "never"}
       camera={camera}
       performance={{ min: 0.6 }}
+      resize={{ debounce: 0, scroll: false }}
       gl={{
         antialias: true,
         alpha: true,
@@ -103,12 +103,10 @@ export function OrbStage({
           <Lightformer intensity={1.7} color="#6b62ff" position={[-3, 0, 1]} rotation-y={Math.PI / 2} scale={[3, 2, 1]} />
           <Lightformer intensity={1.2} color="#ffae55" position={[3, -1, 0]} rotation-y={-Math.PI / 2} scale={[2, 1, 1]} />
         </Environment>
-        <group scale={orbId === "neural" ? 1 : 1.08}>
+        <group>
           <Orb engineRef={engineRef} detail={quality} />
-          {orbId !== "neural" ? <PaidOrbAccents orbId={orbId} /> : null}
         </group>
       </Suspense>
-      <AdaptiveDpr pixelated={false} />
       {interactive ? (
         <OrbitControls
           enablePan={false}
@@ -122,7 +120,7 @@ export function OrbStage({
           zoomSpeed={0.25}
         />
       ) : null}
-      <EffectComposer enableNormalPass={false} multisampling={interactive ? 4 : 0}>
+      <EffectComposer enableNormalPass={false} multisampling={0}>
         <Bloom
           intensity={orbId === "neural" ? bloom : bloom}
           luminanceThreshold={0.82}

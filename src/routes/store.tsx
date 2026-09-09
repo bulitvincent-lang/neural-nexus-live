@@ -3,8 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { CheckoutOverlay } from "@/components/store/CheckoutOverlay";
-import { OrbCard } from "@/components/store/OrbCard";
-import { OrbPreviewModal } from "@/components/store/OrbPreviewModal";
+import { OrbRow } from "@/components/store/OrbRow";
 import {
   ORB_PRICE,
   ORB_PRICE_IDS,
@@ -15,7 +14,6 @@ import {
 } from "@/config/pricing";
 import { SITE } from "@/config/site";
 import { useOrbAccount } from "@/hooks/useOrbAccount";
-import { ORBS, ORB_BY_ID } from "@/lib/orbs/catalog";
 import { paymentsConfigured } from "@/lib/stripe";
 import type { OrbId } from "@/lib/orbs/types";
 
@@ -47,7 +45,6 @@ function StorePage() {
   const { session_id: sessionId } = Route.useSearch();
   const navigate = useNavigate();
   const account = useOrbAccount();
-  const [previewId, setPreviewId] = useState<OrbId | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [pending, setPending] = useState<OrbId | "subscription" | null>(null);
   const [checkout, setCheckout] = useState<{ priceId: string; orbId?: OrbId | undefined; title: string } | null>(
@@ -55,8 +52,6 @@ function StorePage() {
   );
 
   const ownedIds = useMemo(() => new Set(account.orbIds), [account.orbIds]);
-  const owned = ORBS.filter((o) => o.included || ownedIds.has(o.id));
-  const available = ORBS.filter((o) => !o.included && !ownedIds.has(o.id));
 
   // Coming back from a payment: confirm with the payment provider, then show it.
   useEffect(() => {
@@ -192,45 +187,23 @@ function StorePage() {
         ) : null}
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 pb-4">
-        <h2 className="text-[11px] uppercase tracking-[0.32em] text-[#8ba4c4]">My Orbs</h2>
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {owned.map((orb) => (
-            <OrbCard
-              key={orb.id}
-              orb={orb}
-              state={orb.included ? "included" : "owned"}
-              active={account.activeOrb === orb.id}
-              onPreview={() => setPreviewId(orb.id)}
-              onUse={() => {
-                account.setActiveOrb(orb.id);
-                setNotice(`${orb.name} is now your live orb.`);
-              }}
-              onBuy={() => undefined}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-6 pb-24 pt-12">
-        <h2 className="text-[11px] uppercase tracking-[0.32em] text-[#8ba4c4]">
-          Available · {formatPrice(ORB_PRICE)} each, one-time
+      <section className="pb-24">
+        <h2 className="mx-auto max-w-6xl px-6 text-[11px] uppercase tracking-[0.32em] text-[#8ba4c4]">
+          All orbs · click one to enlarge it
         </h2>
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {available.map((orb) => (
-            <OrbCard
-              key={orb.id}
-              orb={orb}
-              state="available"
-              active={false}
-              busy={pending === orb.id}
-              onPreview={() => setPreviewId(orb.id)}
-              onUse={() => undefined}
-              onBuy={() => startPurchase(orb.id, orb.name)}
-            />
-          ))}
+        <div className="mt-6">
+          <OrbRow
+            ownedIds={ownedIds}
+            activeOrb={account.activeOrb}
+            pending={pending}
+            onUse={(orb) => {
+              account.setActiveOrb(orb.id);
+              setNotice(`${orb.name} is now your live orb.`);
+            }}
+            onBuy={(orb) => startPurchase(orb.id, orb.name)}
+          />
         </div>
-        <p className="mt-8 max-w-xl text-[11px] leading-relaxed text-[#7f96b6]">
+        <p className="mx-auto mt-10 max-w-xl px-6 text-[11px] leading-relaxed text-[#7f96b6]">
           Orbs you buy stay in your account for good. If your {formatPrice(SUBSCRIPTION_PRICE)} /
           year subscription lapses they stay yours and come back the moment it is active again. Your
           first {TRIAL_DAYS} days are free.
@@ -260,9 +233,6 @@ function StorePage() {
         />
       ) : null}
 
-      {previewId ? (
-        <OrbPreviewModal orb={ORB_BY_ID[previewId]} onClose={() => setPreviewId(null)} />
-      ) : null}
     </div>
   );
 }
