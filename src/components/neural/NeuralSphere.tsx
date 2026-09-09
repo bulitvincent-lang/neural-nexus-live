@@ -167,12 +167,12 @@ export function NeuralSphere({
   );
 
   const nodeUniforms = useMemo(
-    () => ({ ...uniforms, uSize: { value: 2.6 } }),
+    () => ({ ...uniforms, uSize: { value: 1.5 } }),
     [uniforms],
   );
   const edgeUniforms = useMemo(() => ({ ...uniforms }), [uniforms]);
   const pulseUniforms = useMemo(
-    () => ({ uSize: { value: 4.6 }, uPalette: uniforms.uPalette }),
+    () => ({ uSize: { value: 2.8 }, uPalette: uniforms.uPalette }),
     [uniforms],
   );
   const dustUniforms = useMemo(() => ({ ...uniforms, uSize: { value: 1.1 } }), [uniforms]);
@@ -386,8 +386,8 @@ export function NeuralSphere({
 
     uniforms.uTime.value = time;
     uniforms.uActivity.value = p.activityLevel;
-    nodeUniforms.uSize.value = 2.2 + p.glowIntensity * 1.4;
-    pulseUniforms.uSize.value = 4.0 + p.glowIntensity * 2.4;
+    nodeUniforms.uSize.value = 1.3 + p.glowIntensity * 0.8;
+    pulseUniforms.uSize.value = 2.4 + p.glowIntensity * 1.4;
 
     // ---- natural rotation + the faintest cursor parallax ----
     if (group.current) {
@@ -403,7 +403,7 @@ export function NeuralSphere({
       {/* inner light: gives the network a lit core */}
       <mesh>
         <sphereGeometry args={[0.28, 32, 32]} />
-        <meshBasicMaterial color="#0d2647" transparent opacity={0.55} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial color="#0d2647" transparent opacity={0.18} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
 
       <lineSegments frustumCulled={false}>

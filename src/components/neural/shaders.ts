@@ -53,8 +53,8 @@ void main() {
   float core = smoothstep(0.5, 0.0, d);
   float glow = pow(core, 3.0);
   float depthFade = mix(1.0, 0.28, vDepth);
-  float a = (0.10 + 0.9 * vAct) * (glow * 0.9 + core * 0.25) * depthFade;
-  gl_FragColor = vec4(vColor * (0.6 + 1.5 * vAct), a);
+  float a = (0.03 + 0.42 * vAct) * (glow * 0.9 + core * 0.18) * depthFade;
+  gl_FragColor = vec4(vColor * (0.35 + 0.8 * vAct), a);
 }
 `;
 
@@ -86,7 +86,7 @@ export const EDGE_FRAG = /* glsl */ `
 varying vec3 vColor;
 varying float vAlpha;
 void main() {
-  gl_FragColor = vec4(vColor, vAlpha);
+  gl_FragColor = vec4(vColor * 0.8, vAlpha * 0.5);
 }
 `;
 
@@ -120,8 +120,8 @@ void main() {
   float d = length(uv);
   if (d > 0.5) discard;
   float core = smoothstep(0.5, 0.0, d);
-  float a = pow(core, 2.2) * vEnergy * mix(1.0, 0.3, vDepth);
-  gl_FragColor = vec4(vColor * 1.6, a);
+  float a = pow(core, 2.4) * vEnergy * 0.55 * mix(1.0, 0.3, vDepth);
+  gl_FragColor = vec4(vColor * 0.9, a);
 }
 `;
 
@@ -149,6 +149,6 @@ void main() {
   float d = length(uv);
   if (d > 0.5) discard;
   float core = smoothstep(0.5, 0.0, d);
-  gl_FragColor = vec4(vec3(0.72, 0.85, 1.0), core * (0.06 + 0.10 * uActivity) * vFade);
+  gl_FragColor = vec4(vec3(0.72, 0.85, 1.0), core * (0.03 + 0.05 * uActivity) * vFade);
 }
 `;
