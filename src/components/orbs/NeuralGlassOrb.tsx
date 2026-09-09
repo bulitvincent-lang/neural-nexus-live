@@ -656,7 +656,7 @@ export function NeuralGlassOrb({
     const stt = new Float32Array(sttA);
     const so = new Float32Array(soA);
     const sh = new Float32Array(shA);
-    (window as any).__spark = [...((window as any).__spark ?? []), [variant.topology, sp.length / 3, routeCount]];
+    document.title = "SPARK:" + (sp.length / 3) + ":" + routeCount;
 
     const shs = new Float32Array(shsA);
 
