@@ -65,3 +65,19 @@ AI / Agent -> Host / Provider -> Provider Adapter -> Local Activity Bridge
 
 Adding an integration = write a provider and `activityBridge.register(...)` in
 `src/lib/neural/providers/index.ts`. The NeuralEngine never changes.
+
+## Native Tauri bridge (Rust)
+
+`src-tauri/src/main.rs` runs a loopback-only HTTP server on `127.0.0.1:4319`
+once the desktop app is packaged (no dev-server dependency). Any local AI
+runtime, agent script or provider sidecar can drive the orb:
+
+    curl -X POST http://127.0.0.1:4319/activity \
+      -H 'content-type: application/json' \
+      -d '{"type":"STREAMING","intensity":0.8}'
+
+Accepted body: one signal object or an array. The bridge validates JSON,
+caps bodies at 16 KB, forwards at most 24 events/second, stores nothing,
+and relays each signal to the webview via the Tauri `ai-activity` event
+(consumed by `MCPActivityProvider`). A `bridge_health` Tauri command is
+exposed for diagnostics.
