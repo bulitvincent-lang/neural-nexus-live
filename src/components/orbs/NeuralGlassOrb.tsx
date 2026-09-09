@@ -11,7 +11,15 @@ import { useOrbEngine, type OrbViewProps } from "./useOrbEngine";
  * fine filaments and travelling impulses.
  */
 
-export type Topology = "spiral" | "membrane" | "dendrite" | "ring" | "facet" | "filament" | "ribbon";
+export type Topology =
+  | "spiral"
+  | "disc"
+  | "membrane"
+  | "dendrite"
+  | "ring"
+  | "facet"
+  | "filament"
+  | "ribbon";
 
 export interface OrbVariant {
   topology: Topology;
@@ -29,9 +37,13 @@ export interface OrbVariant {
   spin: number;
   /** additive rim strength of the glass shell */
   rim: number;
+  /** draw the glass envelope at all (off for most orbs) */
+  shell?: boolean;
   rays?: boolean;
   satellites?: number;
   coreSize?: number;
+  /** number of electric arcs crackling inside the orb */
+  bolts?: number;
 }
 
 const NODE_VERT = /* glsl */ `
