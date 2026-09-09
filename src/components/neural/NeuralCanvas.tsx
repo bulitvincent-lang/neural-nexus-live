@@ -81,10 +81,10 @@ export function NeuralCanvas() {
       <EffectComposer enableNormalPass={false}>
         <Bloom
           intensity={quality.bloom * 0.78}
-          luminanceThreshold={0.22}
+          luminanceThreshold={0.28}
           luminanceSmoothing={0.5}
           mipmapBlur
-          radius={0.82}
+          radius={0.74}
         />
         <ChromaticAberration offset={[0.0006, 0.0009]} radialModulation modulationOffset={0.35} />
         <ToneMapping />

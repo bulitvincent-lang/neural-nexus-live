@@ -58,7 +58,7 @@ void main() {
   float hot = pow(core, 7.0);
   float halo = pow(core, 1.7);
   float depthFade = mix(1.0, 0.26, vDepth);
-  float a = (0.07 + 0.55 * vAct) * (hot * 1.15 + halo * 0.34) * depthFade * vTwinkle;
+  float a = (0.10 + 0.62 * vAct) * (hot * 1.25 + halo * 0.4) * depthFade * vTwinkle;
   vec3 col = mix(vColor, vec3(1.0), hot * (0.25 + 0.5 * vAct));
   gl_FragColor = vec4(col * (0.42 + 1.25 * vAct), a);
 }
