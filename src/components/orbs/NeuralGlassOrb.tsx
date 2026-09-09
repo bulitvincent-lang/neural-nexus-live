@@ -18,6 +18,7 @@ export type Topology =
   | "dendrite"
   | "ring"
   | "facet"
+  | "shard"
   | "filament"
   | "ribbon";
 
