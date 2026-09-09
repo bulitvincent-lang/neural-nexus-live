@@ -428,18 +428,6 @@ export function NeuralSphere({
         />
       </mesh>
 
-      {/* glassy atmosphere shell with a lit fresnel rim */}
-      <mesh>
-        <sphereGeometry args={[1.06, 64, 64]} />
-        <shaderMaterial
-          vertexShader={ATMO_VERT}
-          fragmentShader={ATMO_FRAG}
-          uniforms={atmoUniforms}
-          transparent
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
 
 
       <lineSegments frustumCulled={false}>
