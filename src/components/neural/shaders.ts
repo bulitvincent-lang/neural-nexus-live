@@ -189,11 +189,11 @@ varying vec3 vNormal;
 varying vec3 vView;
 void main() {
   float f = 1.0 - clamp(dot(normalize(vNormal), normalize(vView)), 0.0, 1.0);
-  float rim = pow(f, 3.2);
-  float body = pow(1.0 - f, 2.0);
+  // rim only: a thin halo hugging the silhouette, nothing across the body
+  float rim = pow(f, 9.0);
   float breathe = 0.9 + 0.1 * sin(uTime * 0.5);
-  vec3 col = uRim * rim * (0.55 + 0.9 * uActivity) + uInner * body * 0.22;
-  float a = (rim * 0.30 + body * 0.05) * breathe * (0.7 + 0.5 * uActivity);
+  vec3 col = mix(uInner, uRim, 0.65) * (0.5 + 0.8 * uActivity);
+  float a = rim * 0.16 * breathe * (0.6 + 0.6 * uActivity);
   gl_FragColor = vec4(col, a);
 }
 `;
