@@ -18,6 +18,7 @@ export type Topology =
   | "dendrite"
   | "ring"
   | "facet"
+  | "shard"
   | "filament"
   | "ribbon";
 
@@ -59,8 +60,12 @@ uniform float uNode;
 uniform float uBreath;
 uniform float uSize;
 uniform float uBuild;
+uniform vec3 uCursor;
+uniform float uCursorAmp;
+uniform float uWave;
 varying float vI;
 varying float vTint;
+varying float vNear;
 
 void main() {
   vec3 dir = normalize(position + 1e-5);
@@ -69,15 +74,26 @@ void main() {
   float rev = smoothstep(aOrder - 0.42, aOrder + 0.05, uBuild);
   float wob = sin(uTime * (0.6 + aSeed * 0.9) + aSeed * 31.0);
   vec3 p = dir * (r * mix(0.9, 1.0, rev) + wob * uBreath * (0.35 + uActivity * 0.9) * rev);
+
+  // nodes near the cursor lift and light up, like a touched membrane
+  float cd = length(p - uCursor);
+  float near = exp(-cd * cd * 5.5) * uCursorAmp;
+  p += dir * near * 0.055;
+  // a slow luminous ripple sweeping outwards from the cursor
+  float ripple = smoothstep(0.34, 0.0, abs(cd - uWave)) * uCursorAmp;
+
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
 
   float fire = 0.5 + 0.5 * sin(uTime * (1.1 + aSeed * 3.4) + aSeed * 40.0);
   // at rest the orb glows low; hovering makes every node blaze
   vI = mix(0.30, 1.0, fire * (0.35 + uNode * 0.85)) * rev
-     * (0.62 + smoothstep(0.78, 1.0, uBuild) * 0.75);
+     * (0.62 + smoothstep(0.78, 1.0, uBuild) * 0.75)
+     + near * 1.15 + ripple * 0.8;
   vTint = aTint;
-  gl_PointSize = uSize * aScale * (0.8 + 0.55 * uActivity) * (26.0 / -mv.z) * rev;
+  vNear = near + ripple * 0.7;
+  gl_PointSize = uSize * aScale * (0.8 + 0.55 * uActivity) * (1.0 + near * 1.5)
+    * (26.0 / -mv.z) * rev;
 }
 `;
 
@@ -87,6 +103,7 @@ uniform vec3 uMain;
 uniform vec3 uHot;
 varying float vI;
 varying float vTint;
+varying float vNear;
 void main() {
   vec2 uv = gl_PointCoord - 0.5;
   float d = length(uv);
@@ -96,6 +113,7 @@ void main() {
   float halo = pow(smoothstep(0.5, 0.0, d), 2.4);
   vec3 col = mix(uDeep, uMain, smoothstep(0.0, 0.6, vTint));
   col = mix(col, uHot, smoothstep(0.62, 1.0, vTint) * vI);
+  col = mix(col, uHot, clamp(vNear, 0.0, 1.0) * 0.7);
   float a = (halo * 0.22 + core * 0.9) * (0.45 + vI * 0.55);
   gl_FragColor = vec4(col * (0.9 + vI * 1.5) + core * 0.45, clamp(a * 1.5, 0.0, 1.0));
 }
@@ -111,26 +129,42 @@ uniform float uActivity;
 uniform float uDensity;
 uniform float uBreath;
 uniform float uBuild;
+uniform vec3 uCursor;
+uniform float uCursorAmp;
+uniform float uWave;
 varying float vI;
 varying float vTint;
 varying float vEnd;
+varying float vNear;
 void main() {
   vec3 dir = normalize(position + 1e-5);
   float r = length(position);
   float rev = smoothstep(aOrder - 0.42, aOrder + 0.05, uBuild);
   float wob = sin(uTime * (0.6 + aSeed * 0.9) + aSeed * 31.0);
   vec3 p = dir * (r * mix(0.9, 1.0, rev) + wob * uBreath * (0.35 + uActivity * 0.9) * rev);
+
+  float cd = length(p - uCursor);
+  float near = exp(-cd * cd * 5.5) * uCursorAmp;
+  float ripple = smoothstep(0.34, 0.0, abs(cd - uWave)) * uCursorAmp;
+  p += dir * near * 0.055;
+
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
 
-  // travelling impulse along the link
-  float phase = fract(uTime * (0.16 + uActivity * 0.6) + aSeed);
+  // travelling impulses along the link, faster and brighter under the cursor
+  float speed = 0.22 + uActivity * 0.7 + near * 0.9;
+  float phase = fract(uTime * speed + aSeed);
   float pulse = smoothstep(0.35, 0.0, abs(phase - aEnd));
+  float second = smoothstep(0.22, 0.0, abs(fract(phase + 0.5) - aEnd));
   float on = max(0.45, step(1.0 - uDensity * 0.95, aSeed));
-  vI = ((0.55 + 0.45 * uActivity) * on + pulse * (0.5 + uActivity * 0.9)) * rev
-     * (0.6 + smoothstep(0.78, 1.0, uBuild) * 0.85);
+  vI = ((0.55 + 0.45 * uActivity) * on
+        + pulse * (0.5 + uActivity * 0.9)
+        + second * 0.35 * (0.3 + uActivity)) * rev
+     * (0.6 + smoothstep(0.78, 1.0, uBuild) * 0.85)
+     + near * 1.4 + ripple * 0.9;
   vTint = aTint;
   vEnd = aEnd;
+  vNear = near + ripple * 0.6;
 }
 `;
 
@@ -139,10 +173,11 @@ uniform vec3 uMain;
 uniform vec3 uAccent;
 varying float vI;
 varying float vTint;
+varying float vNear;
 void main() {
   vec3 col = mix(uMain, uAccent, smoothstep(0.7, 1.0, vTint));
   // additive: brightness comes from rgb * alpha, so keep both meaningful
-  col = mix(col, vec3(1.0), 0.18);
+  col = mix(col, vec3(1.0), 0.18 + clamp(vNear, 0.0, 1.0) * 0.4);
   gl_FragColor = vec4(col * (0.9 + vI * 1.7), clamp(0.3 + vI * 0.9, 0.0, 1.0));
 }
 `;
@@ -325,6 +360,26 @@ function buildNodes(v: OrbVariant, count: number) {
         t = 1 - blend;
         break;
       }
+      case "shard": {
+        // interlocking angular prisms: sharp blades radiating from the core
+        const blade = i % 14;
+        const axis = fib(blade, 14);
+        const side = new THREE.Vector3(-axis.z, 0.35, axis.x).normalize();
+        const along = Math.pow(rnd(), 0.7);
+        const width = (1 - along) * 0.3;
+        p = axis
+          .clone()
+          .multiplyScalar(0.2 + along * 0.78)
+          .addScaledVector(side, (rnd() - 0.5) * width * 2)
+          .addScaledVector(
+            new THREE.Vector3().crossVectors(axis, side).normalize(),
+            (rnd() - 0.5) * width,
+          );
+        // hard prismatic edges: pull some nodes exactly onto the blade spine
+        if (rnd() > 0.6) p.lerp(axis.clone().multiplyScalar(0.2 + along * 0.78), 0.85);
+        t = 0.15 + along * 0.85;
+        break;
+      }
       case "filament": {
         // long great-circle filaments
         const strand = i % 18;
@@ -417,6 +472,17 @@ export function NeuralGlassOrb({
   const clock = useRef(0);
   const build = useRef(0);
   const extras = useRef<THREE.Group>(null);
+  const amp = useRef(0);
+  const touch = useMemo(
+    () => ({
+      point: new THREE.Vector3(0, 0, 0.9),
+      target: new THREE.Vector3(0, 0, 0.9),
+      ray: new THREE.Ray(),
+      tmp: new THREE.Vector3(),
+      sphere: new THREE.Sphere(new THREE.Vector3(), 0.92),
+    }),
+    [],
+  );
 
   const geo = useMemo(() => {
     const count = Math.max(320, Math.round(variant.nodes * (0.5 + detail * 0.5)));
@@ -561,6 +627,9 @@ export function NeuralGlassOrb({
       uBreath: { value: variant.breath },
       uSize: { value: 2.15 },
       uBuild: { value: 0 },
+      uCursor: { value: new THREE.Vector3(0, 0, 2) },
+      uCursorAmp: { value: 0 },
+      uWave: { value: 0 },
       uDeep: { value: col.deep },
       uMain: { value: col.main },
       uHot: { value: col.hot },
@@ -575,6 +644,9 @@ export function NeuralGlassOrb({
       uDensity: { value: 0.3 },
       uBuild: { value: 0 },
       uBreath: { value: variant.breath },
+      uCursor: { value: new THREE.Vector3(0, 0, 2) },
+      uCursorAmp: { value: 0 },
+      uWave: { value: 0 },
       uMain: { value: col.main },
       uAccent: { value: col.accent },
     }),
@@ -613,7 +685,7 @@ export function NeuralGlassOrb({
     [col],
   );
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
     clock.current += dt;
     engine.update(dt);
@@ -621,12 +693,42 @@ export function NeuralGlassOrb({
     const t = clock.current;
 
     // hovering ignites the orb: it assembles, brightens and starts arcing
-    const target = 0.8 + Math.min(1, Math.max(0, energy)) * 0.2;
+    const hover = Math.min(1, Math.max(0, energy));
+    const target = 0.8 + hover * 0.2;
     build.current += (target - build.current) * (1 - Math.exp(-3.2 * dt));
     const b = build.current;
     nodeU.uBuild.value = b;
     linkU.uBuild.value = b;
     boltU.uBuild.value = b;
+
+    // where the light gathers: under the cursor when hovering, otherwise a
+    // slow wandering focus so the orb stays alive at rest
+    if (hover > 0.02) {
+      const { ray, sphere, tmp, target: tp } = touch;
+      ray.origin.setFromMatrixPosition(state.camera.matrixWorld);
+      tmp.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
+      ray.direction.copy(tmp).sub(ray.origin).normalize();
+      const hit = ray.intersectSphere(sphere, tmp);
+      if (hit) tp.copy(hit);
+      else ray.closestPointToPoint(sphere.center, tp).clampLength(0, 0.92);
+      if (group.current) group.current.worldToLocal(tp);
+    } else {
+      touch.target
+        .set(Math.sin(t * 0.37), Math.sin(t * 0.29 + 1.7) * 0.8, Math.cos(t * 0.31))
+        .normalize()
+        .multiplyScalar(0.86);
+    }
+    touch.point.lerp(touch.target, 1 - Math.exp(-9 * dt));
+    const ampTarget = 0.3 + hover * 0.85;
+    amp.current += (ampTarget - amp.current) * (1 - Math.exp(-5 * dt));
+    nodeU.uCursor.value.copy(touch.point);
+    linkU.uCursor.value.copy(touch.point);
+    nodeU.uCursorAmp.value = amp.current;
+    linkU.uCursorAmp.value = amp.current;
+    // luminous ripple radius, expanding away from the focus point
+    const wave = ((t * 0.55) % 2.2) - 0.2;
+    nodeU.uWave.value = wave;
+    linkU.uWave.value = wave;
 
     nodeU.uTime.value = t;
     nodeU.uActivity.value = p.activityLevel;
