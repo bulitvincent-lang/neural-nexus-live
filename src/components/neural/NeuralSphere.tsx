@@ -17,6 +17,7 @@ import {
   PULSE_VERT,
 } from "./shaders";
 
+
 /** Cluster -> palette index: cold hues dominate, amber only once. */
 const TONE_BY_CLUSTER = [0, 1, 2, 4, 1, 0, 2, 4, 1, 2, 0, 4, 1, 5];
 
@@ -179,6 +180,7 @@ export function NeuralSphere({
     [uniforms],
   );
   const dustUniforms = useMemo(() => ({ ...uniforms, uSize: { value: 1.1 } }), [uniforms]);
+
 
   const nodeGeo = useRef<THREE.BufferGeometry>(null);
   const edgeGeo = useRef<THREE.BufferGeometry>(null);
@@ -403,11 +405,8 @@ export function NeuralSphere({
 
   return (
     <group ref={group}>
-      {/* inner light: gives the network a lit core */}
-      <mesh>
-        <sphereGeometry args={[0.22, 32, 32]} />
-        <meshBasicMaterial color="#0d2647" transparent opacity={0.07} blending={THREE.AdditiveBlending} depthWrite={false} />
-      </mesh>
+
+
 
       <lineSegments frustumCulled={false}>
         <bufferGeometry ref={edgeGeo}>

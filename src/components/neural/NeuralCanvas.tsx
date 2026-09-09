@@ -1,6 +1,14 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { Bloom, EffectComposer, ToneMapping, Vignette } from "@react-three/postprocessing";
+import {
+  Bloom,
+  ChromaticAberration,
+  EffectComposer,
+  Noise,
+  ToneMapping,
+  Vignette,
+} from "@react-three/postprocessing";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { activityBus } from "@/lib/neural/eventBus";
@@ -71,10 +79,19 @@ export function NeuralCanvas() {
         zoomSpeed={0.25}
       />
       <EffectComposer enableNormalPass={false}>
-        <Bloom intensity={quality.bloom * 0.62} luminanceThreshold={0.32} luminanceSmoothing={0.4} mipmapBlur radius={0.7} />
+        <Bloom
+          intensity={quality.bloom * 0.78}
+          luminanceThreshold={0.28}
+          luminanceSmoothing={0.5}
+          mipmapBlur
+          radius={0.74}
+        />
+        <ChromaticAberration offset={[0.0006, 0.0009]} radialModulation modulationOffset={0.35} />
         <ToneMapping />
-        <Vignette offset={0.32} darkness={0.62} />
+        <Noise opacity={0.016} premultiply />
+        <Vignette offset={0.28} darkness={0.7} />
       </EffectComposer>
+
     </Canvas>
   );
 }
