@@ -18,7 +18,12 @@ export function SettingsPanel({
   onClose: () => void;
 }) {
   const [, setTick] = useState(0);
-  useEffect(() => connectorManager.subscribe(() => setTick((t) => t + 1)), []);
+  useEffect(() => {
+    const off = connectorManager.subscribe(() => setTick((t) => t + 1));
+    return () => {
+      off();
+    };
+  }, []);
 
   const label = (ai: AiId) =>
     connectorManager.isLive(ai) ? "Connecté" : connectorManager.isConnected(ai) ? "En veille" : "Connecter";

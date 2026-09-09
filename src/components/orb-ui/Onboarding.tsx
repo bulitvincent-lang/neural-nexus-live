@@ -13,7 +13,12 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   const [live, setLive] = useState(false);
   const [detected, setDetected] = useState(false);
 
-  useEffect(() => connectorManager.subscribe((s) => setDetected(s.live)), []);
+  useEffect(() => {
+    const off = connectorManager.subscribe((s) => setDetected(s.live));
+    return () => {
+      off();
+    };
+  }, []);
 
   useEffect(() => {
     if (!choice || step !== "connect") return;
