@@ -146,6 +146,18 @@ export function CrystalOrb({ engineRef, detail = 1 }: OrbViewProps) {
 
   return (
     <group ref={group}>
+      {/* translucent inner body: keeps the shards reading as one crystal */}
+      <mesh scale={0.62}>
+        <icosahedronGeometry args={[1, 1]} />
+        <meshBasicMaterial
+          color="#6f6bff"
+          transparent
+          opacity={0.16}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+
       <instancedMesh ref={mesh} args={[undefined, undefined, count]} frustumCulled={false}>
         <octahedronGeometry args={[1, 0]} />
         <shaderMaterial
