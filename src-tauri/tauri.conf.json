@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "identifier": "app.neuralorb.desktop",
   "build": {
-    "frontendDist": "../dist/client",
+    "frontendDist": "../dist/desktop",
     "devUrl": "http://localhost:8080",
     "beforeDevCommand": "bun run dev",
-    "beforeBuildCommand": "bun run build"
+    "beforeBuildCommand": "bun run build:desktop"
   },
   "app": {
     "windows": [

@@ -41,8 +41,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install
 
-      - name: Build frontend
-        run: bun run build
+      - name: Build desktop frontend
+        run: bun run build:desktop
 
       - name: Inspect frontend output
         shell: bash
@@ -50,7 +50,7 @@ jobs:
         run: |
           ls -la . || true
           ls -la dist || true
-          ls -la .output || true
+          ls -la dist/desktop || true
 
       - uses: tauri-apps/tauri-action@v0
         env:
