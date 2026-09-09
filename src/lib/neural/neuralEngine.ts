@@ -30,7 +30,7 @@ export class NeuralEngine {
   private unsubscribe?: () => void;
   private rand = Math.random;
 
-  constructor(network: NeuralNetwork) {
+  constructor(network: NeuralNetwork | { clusterCount: number }) {
     this.clusterCount = network.clusterCount;
     this.clusterTarget = new Array(this.clusterCount).fill(0);
     this.params = {

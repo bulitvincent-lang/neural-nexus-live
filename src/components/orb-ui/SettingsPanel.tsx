@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 
-import { connectorDownloadUrl } from "@/config/site";
+import { SITE, connectorDownloadUrl } from "@/config/site";
+import { useOrbLibrary } from "@/hooks/useOrbLibrary";
 import type { OrbSettings } from "@/hooks/useOrbSettings";
 import { useI18n } from "@/lib/i18n";
 import { AI_OPTIONS, connectorManager, type AiId } from "@/lib/neural/connectors";
+import { ORBS } from "@/lib/orbs/catalog";
+import { orbState } from "@/lib/orbs/library";
 
 /**
  * Everyday settings, consumer only: my AIs, appearance, application.
@@ -19,6 +22,7 @@ export function SettingsPanel({
   onClose: () => void;
 }) {
   const { t } = useI18n();
+  const { library, setActiveOrb } = useOrbLibrary();
   const [, setTick] = useState(0);
   useEffect(() => {
     const off = connectorManager.subscribe(() => setTick((v) => v + 1));
@@ -74,6 +78,38 @@ export function SettingsPanel({
             className="mt-3 inline-block text-xs text-white/45 underline-offset-4 transition hover:text-white/80 hover:underline"
           >
             {t("set.addCompanion")}
+          </a>
+        </Section>
+
+        <Section title="My Orbs">
+          <div className="flex flex-wrap gap-3">
+            {ORBS.filter((o) => library && orbState(library, o.id, o.included) !== "available").map(
+              (o) => {
+                const active = library?.active_orb === o.id;
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    onClick={() => setActiveOrb(o.id)}
+                    title={o.name}
+                    className={`h-12 w-12 rounded-full transition ${
+                      active ? "ring-2 ring-[#7ceaff]" : "opacity-70 hover:opacity-100"
+                    }`}
+                    style={{
+                      background: `radial-gradient(circle at 42% 38%, ${o.thumb[0]} 0%, ${o.thumb[1]} 58%, rgba(6,10,20,0.9) 82%)`,
+                    }}
+                  />
+                );
+              },
+            )}
+          </div>
+          <a
+            href={`${SITE.url}/store`}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 inline-block text-xs text-white/45 underline-offset-4 transition hover:text-white/80 hover:underline"
+          >
+            Orb Store
           </a>
         </Section>
 
