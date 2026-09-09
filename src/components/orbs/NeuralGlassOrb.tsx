@@ -182,6 +182,77 @@ void main() {
 }
 `;
 
+/** travelling impulses: bright sparks that physically run along the links */
+const SPARK_VERT = /* glsl */ `
+attribute vec3 aDir;
+attribute float aSeed;
+attribute float aTint;
+attribute float aOrder;
+uniform float uTime;
+uniform float uActivity;
+uniform float uBuild;
+uniform float uEnergy;
+uniform float uBreath;
+uniform float uSize;
+uniform vec3 uCursor;
+uniform float uCursorAmp;
+uniform float uWave;
+varying float vI;
+varying float vTint;
+varying float vNear;
+
+void main() {
+  float rev = smoothstep(aOrder - 0.42, aOrder + 0.05, uBuild);
+
+  // each spark runs from one node to the other, then restarts with a gap
+  float speed = 0.35 + uActivity * 0.75 + uEnergy * 0.55;
+  float cyc = fract(uTime * speed * (0.6 + aSeed * 0.9) + aSeed * 7.13);
+  float trip = clamp(cyc / 0.62, 0.0, 1.0);      // travel phase
+  float alive = smoothstep(0.0, 0.06, cyc) * (1.0 - smoothstep(0.58, 0.66, cyc));
+
+  vec3 base = position + aDir * trip;
+  vec3 dir = normalize(base + 1e-5);
+  float r = length(base);
+  float wob = sin(uTime * (0.6 + aSeed * 0.9) + aSeed * 31.0);
+  vec3 p = dir * (r * mix(0.9, 1.0, rev) + wob * uBreath * (0.35 + uActivity * 0.9) * rev);
+
+  float cd = length(p - uCursor);
+  float near = exp(-cd * cd * 5.5) * uCursorAmp;
+  float ripple = smoothstep(0.3, 0.0, abs(cd - uWave)) * uCursorAmp;
+  p += dir * near * 0.06;
+
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mv;
+
+  float head = 1.0 - abs(trip * 2.0 - 1.0) * 0.35;
+  vI = alive * rev * head * (0.55 + uActivity * 0.6 + uEnergy * 0.7)
+     + near * 1.3 + ripple * 0.9;
+  vTint = aTint;
+  vNear = near + ripple * 0.6;
+  gl_PointSize = uSize * (1.1 + uEnergy * 0.9 + near * 2.2) * alive * rev * (26.0 / -mv.z);
+}
+`;
+
+const SPARK_FRAG = /* glsl */ `
+uniform vec3 uHot;
+uniform vec3 uAccent;
+varying float vI;
+varying float vTint;
+varying float vNear;
+void main() {
+  vec2 uv = gl_PointCoord - 0.5;
+  float d = length(uv);
+  if (d > 0.5) discard;
+  float core = smoothstep(0.13, 0.0, d);
+  float halo = pow(smoothstep(0.5, 0.0, d), 2.0);
+  vec3 col = mix(uAccent, uHot, smoothstep(0.3, 1.0, vTint));
+  col = mix(col, vec3(1.0), 0.35 + clamp(vNear, 0.0, 1.0) * 0.35);
+  float a = (core * 1.0 + halo * 0.35) * clamp(vI, 0.0, 1.6);
+  gl_FragColor = vec4(col * (1.0 + vI * 1.8), clamp(a, 0.0, 1.0));
+}
+`;
+
+
 const GLASS_VERT = /* glsl */ `
 varying vec3 vN;
 varying vec3 vV;
