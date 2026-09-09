@@ -85,7 +85,7 @@ export function SingularityOrb({ engineRef, detail = 1 }: OrbViewProps) {
   const halo = useRef<THREE.MeshBasicMaterial>(null);
 
   const data = useMemo(() => {
-    const N = Math.round(9000 * detail);
+    const N = Math.round(5200 * detail);
     const pos = new Float32Array(N * 3);
     const seed = new Float32Array(N);
     const radius = new Float32Array(N);
