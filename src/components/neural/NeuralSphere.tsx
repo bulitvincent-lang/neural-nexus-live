@@ -182,6 +182,16 @@ export function NeuralSphere({
     [uniforms],
   );
   const dustUniforms = useMemo(() => ({ ...uniforms, uSize: { value: 1.1 } }), [uniforms]);
+  const atmoUniforms = useMemo(
+    () => ({
+      uTime: uniforms.uTime,
+      uActivity: uniforms.uActivity,
+      uInner: { value: PALETTE[0].clone() },
+      uRim: { value: PALETTE[1].clone() },
+    }),
+    [uniforms],
+  );
+
 
   const nodeGeo = useRef<THREE.BufferGeometry>(null);
   const edgeGeo = useRef<THREE.BufferGeometry>(null);
@@ -408,9 +418,30 @@ export function NeuralSphere({
     <group ref={group}>
       {/* inner light: gives the network a lit core */}
       <mesh>
-        <sphereGeometry args={[0.22, 32, 32]} />
-        <meshBasicMaterial color="#0d2647" transparent opacity={0.07} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <sphereGeometry args={[0.3, 32, 32]} />
+        <meshBasicMaterial
+          color="#123a6b"
+          transparent
+          opacity={0.09}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
       </mesh>
+
+      {/* glassy atmosphere shell with a lit fresnel rim */}
+      <mesh>
+        <sphereGeometry args={[1.06, 64, 64]} />
+        <shaderMaterial
+          vertexShader={ATMO_VERT}
+          fragmentShader={ATMO_FRAG}
+          uniforms={atmoUniforms}
+          transparent
+          depthWrite={false}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
 
       <lineSegments frustumCulled={false}>
         <bufferGeometry ref={edgeGeo}>
