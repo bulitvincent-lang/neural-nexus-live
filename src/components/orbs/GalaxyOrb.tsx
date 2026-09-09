@@ -13,7 +13,7 @@ const VARIANT: OrbVariant = {
   spin: 0.13,
   rim: 0.9,
   satellites: 7,
-  coreSize: 0.3,
+  coreSize: 0.16,
   bolts: 10,
 };
 
