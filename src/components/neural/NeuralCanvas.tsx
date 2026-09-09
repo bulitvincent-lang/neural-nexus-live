@@ -36,20 +36,9 @@ export function NeuralCanvas() {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
-  // Real MCP activity (tool calls, resource reads, sampling) -> sphere.
-  useEffect(() => {
-    const mcp = new McpActivityAdapter();
-    mcp.start(activityBus);
-    return () => mcp.stop();
-  }, []);
+  // Providers -> Local Activity Bridge -> Event Bus. No host is hardcoded.
+  useEffect(() => startDefaultProviders(), []);
 
-  // Mock activity: development only, no visible surface.
-  useEffect(() => {
-    if (!import.meta.env.DEV) return;
-    const mock = new MockActivityAdapter();
-    mock.start(activityBus);
-    return () => mock.stop();
-  }, []);
 
 
   const quality = QUALITY_PROFILES[level];
