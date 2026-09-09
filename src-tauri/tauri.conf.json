@@ -27,7 +27,7 @@
         "x": 80,
         "y": 80,
         "dragDropEnabled": false,
-        "url": "/orb"
+        "url": "index.html"
       }
     ],
     "security": { "csp": null },
