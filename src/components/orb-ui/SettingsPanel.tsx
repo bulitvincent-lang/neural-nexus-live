@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 
 import { connectorDownloadUrl } from "@/config/site";
 import type { OrbSettings } from "@/hooks/useOrbSettings";
+import { LanguageSwitcher, useI18n } from "@/lib/i18n";
 import { AI_OPTIONS, connectorManager, type AiId } from "@/lib/neural/connectors";
 
 /**
- * Everyday settings, grand public only: my AIs, appearance, application.
+ * Everyday settings, consumer only: my AIs, appearance, application.
  * Never a port, an address, a key or a file path.
  */
 export function SettingsPanel({
@@ -17,21 +18,26 @@ export function SettingsPanel({
   update: (patch: Partial<OrbSettings>) => void;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const [, setTick] = useState(0);
   useEffect(() => {
-    const off = connectorManager.subscribe(() => setTick((t) => t + 1));
+    const off = connectorManager.subscribe(() => setTick((v) => v + 1));
     return () => {
       off();
     };
   }, []);
 
   const label = (ai: AiId) =>
-    connectorManager.isLive(ai) ? "Connecté" : connectorManager.isConnected(ai) ? "En veille" : "Connecter";
+    connectorManager.isLive(ai)
+      ? t("set.connected")
+      : connectorManager.isConnected(ai)
+        ? t("set.idle")
+        : t("set.connect");
 
   return (
-    <div className="pointer-events-auto fixed inset-0 z-20 flex items-center justify-center bg-[#01030a]/75 backdrop-blur-md">
-      <div className="max-h-[88vh] w-[min(520px,92vw)] overflow-y-auto rounded-3xl border border-white/10 bg-white/[0.03] p-7 shadow-2xl">
-        <Section title="Mes IA">
+    <div className="pointer-events-auto fixed inset-0 z-20 flex items-center justify-center bg-[#0a1223]/80 backdrop-blur-md">
+      <div className="max-h-[88vh] w-[min(520px,92vw)] overflow-y-auto rounded-3xl border border-white/10 bg-white/[0.05] p-7 shadow-2xl">
+        <Section title={t("set.myAis")}>
           <div className="divide-y divide-white/5">
             {AI_OPTIONS.filter((o) => o.id !== "other").map((o) => {
               const connected = connectorManager.isConnected(o.id);
@@ -53,8 +59,8 @@ export function SettingsPanel({
                     }
                     className={`rounded-full px-4 py-1.5 text-xs transition ${
                       connected
-                        ? "text-[#38d6f0]/90 hover:text-white/70"
-                        : "border border-white/15 bg-white/[0.05] text-white/80 hover:bg-white/[0.12]"
+                        ? "text-[#7ceaff]/90 hover:text-white/70"
+                        : "border border-white/15 bg-white/[0.07] text-white/80 hover:bg-white/[0.14]"
                     }`}
                   >
                     {label(o.id)}
@@ -65,29 +71,29 @@ export function SettingsPanel({
           </div>
           <a
             href={connectorDownloadUrl}
-            className="mt-3 inline-block text-xs text-white/40 underline-offset-4 transition hover:text-white/70 hover:underline"
+            className="mt-3 inline-block text-xs text-white/45 underline-offset-4 transition hover:text-white/80 hover:underline"
           >
-            Ajouter le connecteur navigateur
+            {t("set.addCompanion")}
           </a>
         </Section>
 
-        <Section title="Apparence">
+        <Section title={t("set.appearance")}>
           <Slider
-            label="Taille"
+            label={t("set.size")}
             value={settings.size}
             min={0.6}
             max={1.4}
             onChange={(size) => update({ size })}
           />
           <Slider
-            label="Intensité"
+            label={t("set.intensity")}
             value={settings.intensity}
             min={0.5}
             max={1.5}
             onChange={(intensity) => update({ intensity })}
           />
           <Slider
-            label="Transparence"
+            label={t("set.transparency")}
             value={1 - settings.opacity}
             min={0}
             max={0.7}
@@ -95,30 +101,34 @@ export function SettingsPanel({
           />
         </Section>
 
-        <Section title="Application">
+        <Section title={t("set.app")}>
           <Toggle
-            label="Démarrer avec l'ordinateur"
+            label={t("set.startup")}
             value={settings.startWithComputer}
             onChange={(startWithComputer) => update({ startWithComputer })}
           />
           <Toggle
-            label="Toujours visible"
+            label={t("set.always")}
             value={settings.alwaysVisible}
             onChange={(alwaysVisible) => update({ alwaysVisible })}
           />
           <Toggle
-            label="Mode économie d'énergie"
+            label={t("set.power")}
             value={settings.powerSaving}
             onChange={(powerSaving) => update({ powerSaving })}
           />
         </Section>
 
+        <Section title={t("set.language")}>
+          <LanguageSwitcher />
+        </Section>
+
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 w-full rounded-full border border-white/15 bg-white/[0.06] py-2.5 text-sm text-white/85 transition hover:bg-white/[0.12]"
+          className="mt-6 w-full rounded-full border border-white/15 bg-white/[0.08] py-2.5 text-sm text-white/85 transition hover:bg-white/[0.14]"
         >
-          Fermer
+          {t("set.close")}
         </button>
       </div>
     </div>
@@ -128,7 +138,7 @@ export function SettingsPanel({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-6">
-      <h2 className="mb-2 text-[11px] uppercase tracking-[0.22em] text-white/35">{title}</h2>
+      <h2 className="mb-2 text-[11px] uppercase tracking-[0.22em] text-white/40">{title}</h2>
       {children}
     </section>
   );
@@ -157,7 +167,7 @@ function Slider({
         step={0.02}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-1 w-full appearance-none rounded-full bg-white/15 accent-[#38d6f0]"
+        className="h-1 w-full appearance-none rounded-full bg-white/15 accent-[#7ceaff]"
       />
     </label>
   );
@@ -180,11 +190,11 @@ function Toggle({
     >
       <span>{label}</span>
       <span
-        className={`relative h-5 w-9 rounded-full transition ${value ? "bg-[#38d6f0]/70" : "bg-white/15"}`}
+        className={`relative h-5 w-9 rounded-full transition ${value ? "bg-[#7ceaff]/70" : "bg-white/15"}`}
       >
         <span
           className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
-            value ? "left-4.5" : "left-0.5"
+            value ? "left-[1.125rem]" : "left-0.5"
           }`}
         />
       </span>

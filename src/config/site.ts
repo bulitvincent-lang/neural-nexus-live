@@ -19,7 +19,7 @@ export const SITE = {
   releaseReady: false,
   /** Browser companion (zip) + its plain-language install page. */
   connectorFile: "neural-orb-connector.zip",
-  connectorPage: "/connecteur",
+  connectorPage: "/connect",
 } as const;
 
 export const connectorDownloadUrl = `${SITE.releaseBase}/${SITE.connectorFile}`;
