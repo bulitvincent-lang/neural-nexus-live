@@ -70,7 +70,7 @@ export function CrystalOrb({ engineRef, detail = 1 }: OrbViewProps) {
   const clock = useRef(0);
   const mesh = useRef<THREE.InstancedMesh>(null);
 
-  const count = detail < 0.7 ? 90 : 190;
+  const count = detail < 0.7 ? 70 : 120;
 
   const attrs = useMemo(() => {
     const seed = new Float32Array(count);
