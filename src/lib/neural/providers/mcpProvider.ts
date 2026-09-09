@@ -72,9 +72,11 @@ export class MCPActivityProvider implements ActivityProvider {
     const hasTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
     if (!hasTauri) return;
     try {
-      const mod = (await import(/* @vite-ignore */ "@tauri-apps/api/event")) as {
+      const tauriEventModule = "@tauri-apps/api/event";
+      const mod = (await import(/* @vite-ignore */ tauriEventModule)) as {
         listen: (name: string, cb: (e: { payload: unknown }) => void) => Promise<() => void>;
       };
+
       this.unlistenTauri = await mod.listen("ai-activity", (e) => {
         const p = e.payload as McpSignal | { signals?: McpSignal[] } | null;
         if (!p) return;
