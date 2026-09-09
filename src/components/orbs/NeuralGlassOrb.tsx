@@ -576,6 +576,8 @@ export function NeuralGlassOrb({
     glassU.uActivity.value = p.activityLevel;
     coreU.uTime.value = t;
     coreU.uActivity.value = p.activityLevel;
+    boltU.uTime.value = t;
+    boltU.uActivity.value = p.activityLevel;
 
     if (group.current) {
       group.current.rotation.y += dt * (variant.spin + p.rotationSpeed * 0.5);
