@@ -188,6 +188,8 @@ attribute vec3 aDir;
 attribute float aSeed;
 attribute float aTint;
 attribute float aOrder;
+attribute float aHop;
+attribute float aHops;
 uniform float uTime;
 uniform float uActivity;
 uniform float uBuild;
@@ -204,11 +206,13 @@ varying float vNear;
 void main() {
   float rev = smoothstep(aOrder - 0.42, aOrder + 0.05, uBuild);
 
-  // each spark runs from one node to the other, then restarts with a gap
-  float speed = 0.35 + uActivity * 0.75 + uEnergy * 0.55;
-  float cyc = fract(uTime * speed * (0.6 + aSeed * 0.9) + aSeed * 7.13);
-  float trip = clamp(cyc / 0.62, 0.0, 1.0);      // travel phase
-  float alive = smoothstep(0.0, 0.06, cyc) * (1.0 - smoothstep(0.58, 0.66, cyc));
+  // one impulse runs along a whole multi-hop route: each vertex owns one hop
+  // and lights up only while the impulse is crossing it
+  float speed = 0.16 + uActivity * 0.22 + uEnergy * 0.24;
+  float phase = fract(uTime * speed + aSeed);
+  float local = phase * (aHops + 1.4) - aHop;
+  float trip = clamp(local, 0.0, 1.0);
+  float alive = step(0.0, local) * (1.0 - step(1.0, local));
 
   vec3 base = position + aDir * trip;
   vec3 dir = normalize(base + 1e-5);
@@ -224,12 +228,12 @@ void main() {
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
 
-  float head = 1.0 - abs(trip * 2.0 - 1.0) * 0.35;
-  vI = alive * rev * head * (0.55 + uActivity * 0.6 + uEnergy * 0.7)
-     + near * 1.3 + ripple * 0.9;
+  vI = alive * rev * (0.85 + uActivity * 0.6 + uEnergy * 0.8)
+     + alive * (near * 1.6 + ripple * 1.0);
   vTint = aTint;
   vNear = near + ripple * 0.6;
-  gl_PointSize = uSize * (1.1 + uEnergy * 0.9 + near * 2.2) * alive * rev * (26.0 / -mv.z);
+  gl_PointSize = uSize * (1.0 + uEnergy * 1.1 + near * 2.6) * rev * (26.0 / -mv.z)
+    * mix(0.0, 1.0, alive);
 }
 `;
 
@@ -243,14 +247,15 @@ void main() {
   vec2 uv = gl_PointCoord - 0.5;
   float d = length(uv);
   if (d > 0.5) discard;
-  float core = smoothstep(0.13, 0.0, d);
-  float halo = pow(smoothstep(0.5, 0.0, d), 2.0);
+  float core = smoothstep(0.2, 0.0, d);
+  float halo = pow(smoothstep(0.5, 0.0, d), 1.8);
   vec3 col = mix(uAccent, uHot, smoothstep(0.3, 1.0, vTint));
-  col = mix(col, vec3(1.0), 0.35 + clamp(vNear, 0.0, 1.0) * 0.35);
-  float a = (core * 1.0 + halo * 0.35) * clamp(vI, 0.0, 1.6);
-  gl_FragColor = vec4(col * (1.0 + vI * 1.8), clamp(a, 0.0, 1.0));
+  col = mix(col, vec3(1.0), 0.5 + clamp(vNear, 0.0, 1.0) * 0.4);
+  float a = (core * 1.0 + halo * 0.45) * clamp(vI, 0.0, 1.8);
+  gl_FragColor = vec4(col * (1.2 + vI * 2.2), clamp(a, 0.0, 1.0));
 }
 `;
+
 
 
 const GLASS_VERT = /* glsl */ `
@@ -594,34 +599,64 @@ export function NeuralGlassOrb({
       lo[k] = Math.min(1, Math.max(nodeOrder[pairs[k]!]!, nodeOrder[pairs[k + (k % 2 ? -1 : 1)]!]!) + 0.05);
     }
 
-    // travelling impulses: one spark per sampled link, several per busy link
-    const segCount = pairs.length / 2;
-    const sparkCount = Math.min(900, Math.max(120, Math.round(segCount * 0.55)));
-    const sp = new Float32Array(sparkCount * 3);
-    const sd = new Float32Array(sparkCount * 3);
-    const ss = new Float32Array(sparkCount);
-    const stt = new Float32Array(sparkCount);
-    const so = new Float32Array(sparkCount);
-    const sr = mulberry(sparkCount * 131 + count);
-    for (let i = 0; i < sparkCount; i++) {
-      const seg = Math.floor(sr() * segCount);
-      const ia = pairs[seg * 2]!;
-      const ib = pairs[seg * 2 + 1]!;
-      const a = pts[ia]!;
-      const b = pts[ib]!;
-      const flip = sr() > 0.5;
-      const from = flip ? b : a;
-      const to = flip ? a : b;
-      sp[i * 3] = from.x;
-      sp[i * 3 + 1] = from.y;
-      sp[i * 3 + 2] = from.z;
-      sd[i * 3] = to.x - from.x;
-      sd[i * 3 + 1] = to.y - from.y;
-      sd[i * 3 + 2] = to.z - from.z;
-      ss[i] = sr();
-      stt[i] = sr() > 0.7 ? 1 : nodeTint[ia]!;
-      so[i] = Math.min(1, Math.max(nodeOrder[ia]!, nodeOrder[ib]!) + 0.05);
+    // travelling impulses: each one walks a multi-hop route across the network,
+    // so you actually see light circulating from node to node
+    const adj = new Map<number, number[]>();
+    for (let k = 0; k < pairs.length; k += 2) {
+      const a0 = pairs[k]!;
+      const b0 = pairs[k + 1]!;
+      (adj.get(a0) ?? adj.set(a0, []).get(a0)!).push(b0);
+      (adj.get(b0) ?? adj.set(b0, []).get(b0)!).push(a0);
     }
+    const starts = [...adj.keys()];
+    const HOPS = 7;
+    const routeCount = starts.length ? Math.min(260, Math.max(60, Math.round(starts.length * 0.22))) : 0;
+    const sr = mulberry(routeCount * 131 + count + 5);
+    const spA: number[] = [];
+    const sdA: number[] = [];
+    const ssA: number[] = [];
+    const sttA: number[] = [];
+    const soA: number[] = [];
+    const shA: number[] = [];
+    const shsA: number[] = [];
+    for (let i = 0; i < routeCount; i++) {
+      let cur = starts[Math.floor(sr() * starts.length)]!;
+      let prev = -1;
+      const seed = sr();
+      const route: number[] = [cur];
+      for (let h = 0; h < HOPS; h++) {
+        const nb = adj.get(cur);
+        if (!nb || nb.length === 0) break;
+        // prefer moving forward, never straight back where we came from
+        let next = nb[Math.floor(sr() * nb.length)]!;
+        if (next === prev && nb.length > 1) next = nb[(nb.indexOf(next) + 1) % nb.length]!;
+        prev = cur;
+        cur = next;
+        route.push(cur);
+      }
+      const hops = route.length - 1;
+      if (hops < 2) continue;
+      const tint = sr() > 0.6 ? 1 : nodeTint[route[0]!]!;
+      for (let h = 0; h < hops; h++) {
+        const from = pts[route[h]!]!;
+        const to = pts[route[h + 1]!]!;
+        spA.push(from.x, from.y, from.z);
+        sdA.push(to.x - from.x, to.y - from.y, to.z - from.z);
+        ssA.push(seed);
+        sttA.push(tint);
+        soA.push(Math.min(1, Math.max(nodeOrder[route[h]!]!, nodeOrder[route[h + 1]!]!) + 0.05));
+        shA.push(h);
+        shsA.push(hops);
+      }
+    }
+    const sp = new Float32Array(spA);
+    const sd = new Float32Array(sdA);
+    const ss = new Float32Array(ssA);
+    const stt = new Float32Array(sttA);
+    const so = new Float32Array(soA);
+    const sh = new Float32Array(shA);
+    const shs = new Float32Array(shsA);
+
 
     // electric arcs: jagged polylines hopping between distant nodes
     const boltCount = variant.bolts ?? 0;
@@ -678,7 +713,7 @@ export function NeuralGlassOrb({
       }
     }
 
-    return { count, nodePos, nodeSeed, nodeTint, nodeScale, nodeOrder, lp, ls, le, lt, lo, bp, bs, ba, sp, sd, ss, stt, so };
+    return { count, nodePos, nodeSeed, nodeTint, nodeScale, nodeOrder, lp, ls, le, lt, lo, bp, bs, ba, sp, sd, ss, stt, so, sh, shs };
   }, [variant, detail]);
 
   const rays = useMemo(() => {
@@ -793,7 +828,7 @@ export function NeuralGlassOrb({
       uBuild: { value: 0 },
       uEnergy: { value: 0 },
       uBreath: { value: variant.breath },
-      uSize: { value: 3.1 },
+      uSize: { value: 24.0 },
       uCursor: { value: new THREE.Vector3(0, 0, 2) },
       uCursorAmp: { value: 0 },
       uWave: { value: 0 },
@@ -942,6 +977,9 @@ export function NeuralGlassOrb({
           <bufferAttribute attach="attributes-aDir" args={[geo.sd, 3]} />
           <bufferAttribute attach="attributes-aSeed" args={[geo.ss, 1]} />
           <bufferAttribute attach="attributes-aTint" args={[geo.stt, 1]} />
+          <bufferAttribute attach="attributes-aHop" args={[geo.sh, 1]} />
+          <bufferAttribute attach="attributes-aHops" args={[geo.shs, 1]} />
+
           <bufferAttribute attach="attributes-aOrder" args={[geo.so, 1]} />
         </bufferGeometry>
         <shaderMaterial
