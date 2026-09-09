@@ -652,6 +652,25 @@ export function NeuralGlassOrb({
         />
       </points>
 
+      {/* electric arcs */}
+      {geo.bp && geo.bs && geo.ba ? (
+        <lineSegments frustumCulled={false}>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" args={[geo.bp, 3]} />
+            <bufferAttribute attach="attributes-aSeed" args={[geo.bs, 1]} />
+            <bufferAttribute attach="attributes-aAlong" args={[geo.ba, 1]} />
+          </bufferGeometry>
+          <shaderMaterial
+            vertexShader={BOLT_VERT}
+            fragmentShader={BOLT_FRAG}
+            uniforms={boltU}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </lineSegments>
+      ) : null}
+
       {/* outward rays */}
       {rays ? (
         <lineSegments frustumCulled={false}>
