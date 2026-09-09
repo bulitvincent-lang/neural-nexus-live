@@ -664,7 +664,7 @@ export function NeuralGlassOrb({
     [col],
   );
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
     clock.current += dt;
     engine.update(dt);
@@ -672,12 +672,42 @@ export function NeuralGlassOrb({
     const t = clock.current;
 
     // hovering ignites the orb: it assembles, brightens and starts arcing
-    const target = 0.8 + Math.min(1, Math.max(0, energy)) * 0.2;
+    const hover = Math.min(1, Math.max(0, energy));
+    const target = 0.8 + hover * 0.2;
     build.current += (target - build.current) * (1 - Math.exp(-3.2 * dt));
     const b = build.current;
     nodeU.uBuild.value = b;
     linkU.uBuild.value = b;
     boltU.uBuild.value = b;
+
+    // where the light gathers: under the cursor when hovering, otherwise a
+    // slow wandering focus so the orb stays alive at rest
+    if (hover > 0.02) {
+      const { ray, sphere, tmp, target: tp } = touch;
+      ray.origin.setFromMatrixPosition(state.camera.matrixWorld);
+      tmp.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
+      ray.direction.copy(tmp).sub(ray.origin).normalize();
+      const hit = ray.intersectSphere(sphere, tmp);
+      if (hit) tp.copy(hit);
+      else ray.closestPointToPoint(sphere.center, tp).clampLength(0, 0.92);
+      if (group.current) group.current.worldToLocal(tp);
+    } else {
+      touch.target
+        .set(Math.sin(t * 0.37), Math.sin(t * 0.29 + 1.7) * 0.8, Math.cos(t * 0.31))
+        .normalize()
+        .multiplyScalar(0.86);
+    }
+    touch.point.lerp(touch.target, 1 - Math.exp(-9 * dt));
+    const ampTarget = 0.3 + hover * 0.85;
+    amp.current += (ampTarget - amp.current) * (1 - Math.exp(-5 * dt));
+    nodeU.uCursor.value.copy(touch.point);
+    linkU.uCursor.value.copy(touch.point);
+    nodeU.uCursorAmp.value = amp.current;
+    linkU.uCursorAmp.value = amp.current;
+    // luminous ripple radius, expanding away from the focus point
+    const wave = ((t * 0.55) % 2.2) - 0.2;
+    nodeU.uWave.value = wave;
+    linkU.uWave.value = wave;
 
     nodeU.uTime.value = t;
     nodeU.uActivity.value = p.activityLevel;
