@@ -182,6 +182,77 @@ void main() {
 }
 `;
 
+/** travelling impulses: bright sparks that physically run along the links */
+const SPARK_VERT = /* glsl */ `
+attribute vec3 aDir;
+attribute float aSeed;
+attribute float aTint;
+attribute float aOrder;
+uniform float uTime;
+uniform float uActivity;
+uniform float uBuild;
+uniform float uEnergy;
+uniform float uBreath;
+uniform float uSize;
+uniform vec3 uCursor;
+uniform float uCursorAmp;
+uniform float uWave;
+varying float vI;
+varying float vTint;
+varying float vNear;
+
+void main() {
+  float rev = smoothstep(aOrder - 0.42, aOrder + 0.05, uBuild);
+
+  // each spark runs from one node to the other, then restarts with a gap
+  float speed = 0.35 + uActivity * 0.75 + uEnergy * 0.55;
+  float cyc = fract(uTime * speed * (0.6 + aSeed * 0.9) + aSeed * 7.13);
+  float trip = clamp(cyc / 0.62, 0.0, 1.0);      // travel phase
+  float alive = smoothstep(0.0, 0.06, cyc) * (1.0 - smoothstep(0.58, 0.66, cyc));
+
+  vec3 base = position + aDir * trip;
+  vec3 dir = normalize(base + 1e-5);
+  float r = length(base);
+  float wob = sin(uTime * (0.6 + aSeed * 0.9) + aSeed * 31.0);
+  vec3 p = dir * (r * mix(0.9, 1.0, rev) + wob * uBreath * (0.35 + uActivity * 0.9) * rev);
+
+  float cd = length(p - uCursor);
+  float near = exp(-cd * cd * 5.5) * uCursorAmp;
+  float ripple = smoothstep(0.3, 0.0, abs(cd - uWave)) * uCursorAmp;
+  p += dir * near * 0.06;
+
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mv;
+
+  float head = 1.0 - abs(trip * 2.0 - 1.0) * 0.35;
+  vI = alive * rev * head * (0.55 + uActivity * 0.6 + uEnergy * 0.7)
+     + near * 1.3 + ripple * 0.9;
+  vTint = aTint;
+  vNear = near + ripple * 0.6;
+  gl_PointSize = uSize * (1.1 + uEnergy * 0.9 + near * 2.2) * alive * rev * (26.0 / -mv.z);
+}
+`;
+
+const SPARK_FRAG = /* glsl */ `
+uniform vec3 uHot;
+uniform vec3 uAccent;
+varying float vI;
+varying float vTint;
+varying float vNear;
+void main() {
+  vec2 uv = gl_PointCoord - 0.5;
+  float d = length(uv);
+  if (d > 0.5) discard;
+  float core = smoothstep(0.13, 0.0, d);
+  float halo = pow(smoothstep(0.5, 0.0, d), 2.0);
+  vec3 col = mix(uAccent, uHot, smoothstep(0.3, 1.0, vTint));
+  col = mix(col, vec3(1.0), 0.35 + clamp(vNear, 0.0, 1.0) * 0.35);
+  float a = (core * 1.0 + halo * 0.35) * clamp(vI, 0.0, 1.6);
+  gl_FragColor = vec4(col * (1.0 + vI * 1.8), clamp(a, 0.0, 1.0));
+}
+`;
+
+
 const GLASS_VERT = /* glsl */ `
 varying vec3 vN;
 varying vec3 vV;
@@ -522,6 +593,36 @@ export function NeuralGlassOrb({
       // a link only shows once both of its nodes exist
       lo[k] = Math.min(1, Math.max(nodeOrder[pairs[k]!]!, nodeOrder[pairs[k + (k % 2 ? -1 : 1)]!]!) + 0.05);
     }
+
+    // travelling impulses: one spark per sampled link, several per busy link
+    const segCount = pairs.length / 2;
+    const sparkCount = Math.min(900, Math.max(120, Math.round(segCount * 0.55)));
+    const sp = new Float32Array(sparkCount * 3);
+    const sd = new Float32Array(sparkCount * 3);
+    const ss = new Float32Array(sparkCount);
+    const stt = new Float32Array(sparkCount);
+    const so = new Float32Array(sparkCount);
+    const sr = mulberry(sparkCount * 131 + count);
+    for (let i = 0; i < sparkCount; i++) {
+      const seg = Math.floor(sr() * segCount);
+      const ia = pairs[seg * 2]!;
+      const ib = pairs[seg * 2 + 1]!;
+      const a = pts[ia]!;
+      const b = pts[ib]!;
+      const flip = sr() > 0.5;
+      const from = flip ? b : a;
+      const to = flip ? a : b;
+      sp[i * 3] = from.x;
+      sp[i * 3 + 1] = from.y;
+      sp[i * 3 + 2] = from.z;
+      sd[i * 3] = to.x - from.x;
+      sd[i * 3 + 1] = to.y - from.y;
+      sd[i * 3 + 2] = to.z - from.z;
+      ss[i] = sr();
+      stt[i] = sr() > 0.7 ? 1 : nodeTint[ia]!;
+      so[i] = Math.min(1, Math.max(nodeOrder[ia]!, nodeOrder[ib]!) + 0.05);
+    }
+
     // electric arcs: jagged polylines hopping between distant nodes
     const boltCount = variant.bolts ?? 0;
     let bp: Float32Array | null = null;
@@ -577,7 +678,7 @@ export function NeuralGlassOrb({
       }
     }
 
-    return { count, nodePos, nodeSeed, nodeTint, nodeScale, nodeOrder, lp, ls, le, lt, lo, bp, bs, ba };
+    return { count, nodePos, nodeSeed, nodeTint, nodeScale, nodeOrder, lp, ls, le, lt, lo, bp, bs, ba, sp, sd, ss, stt, so };
   }, [variant, detail]);
 
   const rays = useMemo(() => {
@@ -685,6 +786,25 @@ export function NeuralGlassOrb({
     [col],
   );
 
+  const sparkU = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uActivity: { value: 0 },
+      uBuild: { value: 0 },
+      uEnergy: { value: 0 },
+      uBreath: { value: variant.breath },
+      uSize: { value: 3.1 },
+      uCursor: { value: new THREE.Vector3(0, 0, 2) },
+      uCursorAmp: { value: 0 },
+      uWave: { value: 0 },
+      uHot: { value: col.hot },
+      uAccent: { value: col.accent },
+    }),
+    [col, variant.breath],
+  );
+
+
+
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
     clock.current += dt;
@@ -723,12 +843,22 @@ export function NeuralGlassOrb({
     amp.current += (ampTarget - amp.current) * (1 - Math.exp(-5 * dt));
     nodeU.uCursor.value.copy(touch.point);
     linkU.uCursor.value.copy(touch.point);
+    sparkU.uCursor.value.copy(touch.point);
     nodeU.uCursorAmp.value = amp.current;
     linkU.uCursorAmp.value = amp.current;
+    sparkU.uCursorAmp.value = amp.current;
     // luminous ripple radius, expanding away from the focus point
     const wave = ((t * 0.55) % 2.2) - 0.2;
     nodeU.uWave.value = wave;
     linkU.uWave.value = wave;
+    sparkU.uWave.value = wave;
+
+    sparkU.uTime.value = t;
+    sparkU.uActivity.value = p.activityLevel;
+    sparkU.uEnergy.value = hover;
+    sparkU.uBuild.value = b;
+
+
 
     nodeU.uTime.value = t;
     nodeU.uActivity.value = p.activityLevel;
@@ -805,7 +935,27 @@ export function NeuralGlassOrb({
         />
       </lineSegments>
 
+      {/* travelling impulses running along the links */}
+      <points frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[geo.sp, 3]} />
+          <bufferAttribute attach="attributes-aDir" args={[geo.sd, 3]} />
+          <bufferAttribute attach="attributes-aSeed" args={[geo.ss, 1]} />
+          <bufferAttribute attach="attributes-aTint" args={[geo.stt, 1]} />
+          <bufferAttribute attach="attributes-aOrder" args={[geo.so, 1]} />
+        </bufferGeometry>
+        <shaderMaterial
+          vertexShader={SPARK_VERT}
+          fragmentShader={SPARK_FRAG}
+          uniforms={sparkU}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+
       {/* nodes */}
+
       <points frustumCulled={false}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[geo.nodePos, 3]} />
