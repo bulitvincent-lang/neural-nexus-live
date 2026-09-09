@@ -122,6 +122,12 @@ function LandingPage() {
             </p>
           )}
 
+          {ready && (
+            <p className="max-w-md text-[11px] leading-relaxed text-[#8ba4c4]">
+              {t("hero.firstRun")}
+            </p>
+          )}
+
           <Link
             to="/connect"
             className="text-[11px] tracking-wide text-[#9db9de] underline-offset-4 transition-colors hover:text-[#dcebff] hover:underline"
