@@ -589,18 +589,20 @@ export function NeuralGlassOrb({
 
   return (
     <group ref={group}>
-      {/* glass envelope */}
-      <mesh>
-        <sphereGeometry args={[1.03, 64, 64]} />
-        <shaderMaterial
-          vertexShader={GLASS_VERT}
-          fragmentShader={GLASS_FRAG}
-          uniforms={glassU}
-          transparent
-          depthWrite={false}
-          side={THREE.BackSide}
-        />
-      </mesh>
+      {/* glass envelope — only on orbs whose identity is a shell */}
+      {variant.shell ? (
+        <mesh>
+          <sphereGeometry args={[1.03, 64, 64]} />
+          <shaderMaterial
+            vertexShader={GLASS_VERT}
+            fragmentShader={GLASS_FRAG}
+            uniforms={glassU}
+            transparent
+            depthWrite={false}
+            side={THREE.BackSide}
+          />
+        </mesh>
+      ) : null}
       {/* inner luminous core */}
       <mesh>
         <sphereGeometry args={[coreSize, 32, 32]} />
