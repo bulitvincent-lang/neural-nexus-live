@@ -67,9 +67,10 @@ export function GalaxyOrb({ engineRef, detail = 1 }: OrbViewProps) {
 
   const data = useMemo(() => {
     const arms = 3;
-    const stars = Math.round(9000 * detail);
-    const coreCount = Math.round(1200 * detail);
-    const dust = Math.round(3000 * detail);
+    const stars = Math.round(5200 * detail);
+    const coreCount = Math.round(800 * detail);
+    const dust = Math.round(1600 * detail);
+
     const total = stars + coreCount + dust;
     const pos = new Float32Array(total * 3);
     const seed = new Float32Array(total);
