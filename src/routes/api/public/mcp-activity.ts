@@ -36,6 +36,8 @@ function sanitize(raw: unknown) {
     concurrency: num(r["concurrency"], 64),
     size: num(r["size"], 50_000_000),
     durationMs: num(r["durationMs"], 600_000),
+    // routing hint only: letters, digits, dashes (no content can ride here)
+    source: (str(r["source"]) ?? "").replace(/[^a-z0-9-]/gi, "").slice(0, 24) || undefined,
   };
 }
 
