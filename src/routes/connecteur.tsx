@@ -54,13 +54,20 @@ function ConnectorGuide() {
           d'habitude. La sphère se met simplement à vivre en même temps que vous.
         </p>
 
-        <a
-          href={connectorDownloadUrl}
-          className="mt-8 inline-flex items-center gap-2 rounded-full border border-[#38d6f0]/40 bg-[#38d6f0]/10 px-6 py-3 text-sm text-white/90 transition hover:bg-[#38d6f0]/20"
-        >
-          <span className="h-2 w-2 rounded-full bg-[#38d6f0]" />
-          Télécharger le connecteur
-        </a>
+        {SITE.releaseReady ? (
+          <a
+            href={connectorDownloadUrl}
+            className="mt-8 inline-flex items-center gap-2 rounded-full border border-[#38d6f0]/40 bg-[#38d6f0]/10 px-6 py-3 text-sm text-white/90 transition hover:bg-[#38d6f0]/20"
+          >
+            <span className="h-2 w-2 rounded-full bg-[#38d6f0]" />
+            Télécharger le connecteur
+          </a>
+        ) : (
+          <p className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-sm text-white/55">
+            <span className="h-2 w-2 rounded-full bg-white/30" />
+            Le connecteur sera téléchargeable ici dès la sortie de l'application
+          </p>
+        )}
 
         <ol className="mt-12 space-y-6">
           {STEPS.map((s, i) => (

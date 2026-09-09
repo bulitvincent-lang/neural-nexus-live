@@ -11,6 +11,12 @@ export const SITE = {
   releaseBase: "https://github.com/neural-orb/neural-orb/releases/latest/download",
   releasesPage: "https://github.com/neural-orb/neural-orb/releases/latest",
   version: "0.1.0",
+  /**
+   * Passe à true une fois que les installateurs sont publiés sur releaseBase.
+   * Tant que c'est false, la page d'accueil propose l'aperçu en ligne
+   * au lieu de liens de téléchargement qui n'existent pas encore.
+   */
+  releaseReady: false,
   /** Browser companion (zip) + its plain-language install page. */
   connectorFile: "neural-orb-connector.zip",
   connectorPage: "/connecteur",
