@@ -331,35 +331,16 @@ function translate(lang: Lang, key: string, vars?: Record<string, string>) {
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  // English is always the served default: no hydration surprise.
-  const [lang, setLangState] = useState<Lang>("en");
+  // English only.
+  const lang: Lang = "en";
 
   useEffect(() => {
-    const saved = localStorage.getItem(KEY) as Lang | null;
-    if (saved && saved in DICTS) {
-      setLangState(saved);
-      return;
-    }
-    const nav = (navigator.language || "en").slice(0, 2) as Lang;
-    if (nav in DICTS && nav !== "en") setLangState(nav);
+    if (typeof document !== "undefined") document.documentElement.lang = "en";
   }, []);
-
-  const setLang = useCallback((l: Lang) => {
-    setLangState(l);
-    try {
-      localStorage.setItem(KEY, l);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof document !== "undefined") document.documentElement.lang = lang;
-  }, [lang]);
 
   const value = useMemo<Ctx>(
-    () => ({ lang, setLang, t: (k, v) => translate(lang, k, v) }),
-    [lang, setLang],
+    () => ({ lang, setLang: () => {}, t: (k, v) => translate("en", k, v) }),
+    [],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
@@ -368,30 +349,6 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 export function useI18n(): Ctx {
   const ctx = useContext(I18nContext);
   if (ctx) return ctx;
-  // Safe fallback (e.g. component rendered outside the provider): English.
   return { lang: "en", setLang: () => {}, t: (k, v) => translate("en", k, v) };
 }
 
-export function LanguageSwitcher({ className = "" }: { className?: string }) {
-  const { lang, setLang } = useI18n();
-  return (
-    <div
-      className={`inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.06] p-1 backdrop-blur ${className}`}
-    >
-      {LANGS.map((l) => (
-        <button
-          key={l.id}
-          type="button"
-          onClick={() => setLang(l.id)}
-          aria-label={l.label}
-          aria-current={l.id === lang}
-          className={`rounded-full px-2.5 py-1 text-[11px] tracking-wide transition ${
-            l.id === lang ? "bg-white/15 text-white" : "text-white/55 hover:text-white/90"
-          }`}
-        >
-          {l.short}
-        </button>
-      ))}
-    </div>
-  );
-}
