@@ -122,7 +122,7 @@ export function buildNetwork(nodeCount: number, neighbors: number, clusterCount 
       }
     }
     for (const b of best) {
-      if (Math.sqrt(b.d) > 0.38) continue;
+      if (Math.sqrt(b.d) > 0.3) continue;
       addEdge(i, b.j);
     }
   }

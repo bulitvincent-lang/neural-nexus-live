@@ -361,7 +361,7 @@ export function NeuralSphere({
       let target =
         open *
         breathe *
-        (edge.dynamic === 0 ? 0.05 : edge.dynamic > 0.9 ? 0.006 : 0.016) *
+        (edge.dynamic === 0 ? 0.05 : (edge.dynamic > 0.9 ? 0.02 : 0.03) * p.connectionDensity) *
         1.0;
       target += open * (0.045 * clusterAct + 0.42 * endpoints * (0.3 + 0.7 * p.glowIntensity)) * breathe;
       if (p.disturbance > 0.02 && Math.random() < 0.02 * p.disturbance) target *= 0.15;
