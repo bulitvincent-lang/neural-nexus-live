@@ -28,6 +28,21 @@ export function OrbRow({
   const [enlarged, setEnlarged] = useState<Orb | null>(null);
   const [hovered, setHovered] = useState<OrbId | null>(null);
   const [visible, setVisible] = useState<Set<OrbId>>(new Set(["neural", "galaxy", "liquid"]));
+  const [bigSize, setBigSize] = useState(0);
+
+  // the enlarged orb gets a fixed pixel square, measured before it mounts, so
+  // the 3D view is never sized from a still-growing box
+  useEffect(() => {
+    if (!enlarged) {
+      setBigSize(0);
+      return;
+    }
+    const measure = () =>
+      setBigSize(Math.round(Math.min(window.innerHeight * 0.7, window.innerWidth * 0.7)));
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [enlarged]);
 
   // gentle drift, ping-ponging at both ends. Manual scroll always wins.
   useEffect(() => {
@@ -148,12 +163,17 @@ export function OrbRow({
             className="flex min-h-0 items-center justify-center overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="relative"
-              style={{ width: "min(74vh, 74vw)", height: "min(74vh, 74vw)" }}
-            >
-              <OrbStage key={enlarged.id} orbId={enlarged.id} mode="preview" detail={1} bloom={0.22} />
-            </div>
+            {bigSize > 0 ? (
+              <div className="relative" style={{ width: bigSize, height: bigSize }}>
+                <OrbStage
+                  key={`${enlarged.id}-${bigSize}`}
+                  orbId={enlarged.id}
+                  mode="preview"
+                  detail={1}
+                  bloom={0.22}
+                />
+              </div>
+            ) : null}
           </div>
           <div
             className="flex items-center justify-center gap-3 px-6 pb-8"
