@@ -72,10 +72,6 @@ function LandingPage() {
       <header className="mx-auto flex max-w-6xl flex-col items-center px-6 pb-16 pt-6 text-center">
         <div className="relative h-[46vh] min-h-[260px] w-full max-w-[560px]">
           <NeuralCanvas />
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-24"
-            style={{ background: "linear-gradient(to bottom, transparent, #1a2540)" }}
-          />
         </div>
 
         <h1 className="mt-4 max-w-3xl text-4xl font-light leading-[1.08] tracking-tight sm:text-6xl">
