@@ -44,6 +44,8 @@ export interface OrbVariant {
   coreSize?: number;
   /** number of electric arcs crackling inside the orb */
   bolts?: number;
+  /** static tilt of the whole structure, in radians */
+  tilt?: number;
 }
 
 const NODE_VERT = /* glsl */ `
