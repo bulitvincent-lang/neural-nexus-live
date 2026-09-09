@@ -439,7 +439,7 @@ export function NeuralGlassOrb({
         for (let tryI = 0; tryI < 24; tryI++) {
           const cand = pts[Math.floor(br() * pts.length)]!;
           const d = cand.distanceToSquared(a);
-          if (d > 0.004 && d < 0.28 && d < bestD) {
+          if (d > 0.004 && d < 0.05 && d < bestD) {
             bestD = d;
             z = cand;
           }
