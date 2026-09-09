@@ -15,6 +15,7 @@ export class LocalActivityBridge {
   private lastEmit = 0;
   private queue: RawActivitySignal[] = [];
   private flushTimer: ReturnType<typeof setInterval> | null = null;
+  private taps = new Set<(s: RawActivitySignal) => void>();
 
   /** max normalised events per second (visual budget, not a hard limit) */
   constructor(
@@ -52,9 +53,16 @@ export class LocalActivityBridge {
     this.queue = [];
   }
 
+  /** Observe raw signals (used by connectors to know what is alive). */
+  tap(cb: (s: RawActivitySignal) => void) {
+    this.taps.add(cb);
+    return () => this.taps.delete(cb);
+  }
+
   /** Entry point for any provider (and for external code, e.g. a Tauri hook). */
   ingest(signal: RawActivitySignal) {
     if (!this.running) return;
+    for (const cb of this.taps) cb(signal);
     // Keep the queue short: bursts should feel dense, not laggy.
     if (this.queue.length > 96) this.queue.splice(0, this.queue.length - 96);
     this.queue.push(signal);

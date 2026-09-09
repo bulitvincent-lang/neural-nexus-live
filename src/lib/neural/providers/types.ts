@@ -24,6 +24,8 @@ export interface RawActivitySignal {
   /** optional payload size in bytes — used to infer complexity */
   size?: number | undefined;
   timestamp?: number | undefined;
+  /** internal routing hint ("browser", "local", "mcp"...) — never rendered */
+  source?: string | undefined;
 }
 
 

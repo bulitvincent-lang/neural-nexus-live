@@ -11,7 +11,12 @@ export const SITE = {
   releaseBase: "https://github.com/neural-orb/neural-orb/releases/latest/download",
   releasesPage: "https://github.com/neural-orb/neural-orb/releases/latest",
   version: "0.1.0",
+  /** Browser companion (zip) + its plain-language install page. */
+  connectorFile: "neural-orb-connector.zip",
+  connectorPage: "/connecteur",
 } as const;
+
+export const connectorDownloadUrl = `${SITE.releaseBase}/${SITE.connectorFile}`;
 
 export type PlatformId = "macos-arm" | "macos-intel" | "windows" | "linux";
 

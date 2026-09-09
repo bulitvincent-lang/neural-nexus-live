@@ -66,8 +66,13 @@ fn run_bridge(app: AppHandle) {
             }
             let signals = match body {
                 Value::Array(items) => items,
+                Value::Object(ref map) => match map.get("signals") {
+                    Some(Value::Array(items)) => items.clone(),
+                    _ => vec![body],
+                },
                 single => vec![single],
             };
+
             for signal in signals {
                 let count = RATE_COUNT.fetch_add(1, Ordering::Relaxed);
                 if count >= RATE_LIMIT_PER_SEC as u16 {

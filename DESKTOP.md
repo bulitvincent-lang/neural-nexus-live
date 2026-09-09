@@ -81,3 +81,26 @@ caps bodies at 16 KB, forwards at most 24 events/second, stores nothing,
 and relays each signal to the webview via the Tauri `ai-activity` event
 (consumed by `MCPActivityProvider`). A `bridge_health` Tauri command is
 exposed for diagnostics.
+
+## Zero-code connector layer (grand public)
+
+```
+IA (navigateur, agent local, hôte MCP)
+  -> Connector (browser | local-agent | deep)
+  -> ConnectorManager  (détection, connexion, reconnexion auto, health check)
+  -> Local Activity Bridge (interne, port 4319 côté Tauri)
+  -> Activity Protocol -> NeuralEngine -> Sphere
+```
+
+- `src/lib/neural/connectors/` : `ConnectorManager` + connecteurs
+  (`connect/disconnect/isAvailable/getStatus/subscribe`), niveaux 1 (activité
+  basique) et 2 (activité profonde), reconnexion silencieuse à chaque lancement,
+  multi-IA simultanées, état persisté en local.
+- `activityShaper.ts` : extrapolation organique entre START / STREAMING /
+  COMPLETED. Il n'invente jamais d'opération interne non observable.
+- `extension/` : connecteur navigateur (Chrome/Edge MV3) pour chatgpt.com,
+  claude.ai, gemini.google.com, copilot. Métadonnées d'activité uniquement :
+  aucun prompt, aucune réponse, aucun fichier, aucune conversation.
+- UI : `Onboarding` (premier lancement seulement) et `SettingsPanel`
+  (double-clic ou clic droit sur la sphère). Aucun port, endpoint, JSON, token
+  ou URL MCP n'est jamais affiché.

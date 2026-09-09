@@ -16,7 +16,6 @@ import type { ActivityEmit, ActivityProvider, ProviderState } from "./types";
  * product.
  */
 export class MCPActivityProvider implements ActivityProvider {
-  readonly id = "mcp";
   readonly priority = 10;
 
   private emit: ActivityEmit | null = null;
@@ -27,7 +26,10 @@ export class MCPActivityProvider implements ActivityProvider {
   private state: ProviderState = "idle";
   private stopped = false;
 
-  constructor(private readonly streamUrl = "/api/public/mcp-activity?stream=1") {}
+  constructor(
+    private readonly streamUrl = "/api/public/mcp-activity?stream=1",
+    readonly id = "mcp",
+  ) {}
 
   isAvailable() {
     return typeof window !== "undefined";
@@ -122,7 +124,15 @@ export class MCPActivityProvider implements ActivityProvider {
     }
   }
 
-  private handle(signal: McpSignal & { type?: string; intensity?: number; complexity?: number; parallelTasks?: number }) {
+  private handle(
+    signal: McpSignal & {
+      type?: string;
+      intensity?: number;
+      complexity?: number;
+      parallelTasks?: number;
+      source?: string;
+    },
+  ) {
     if (!this.emit) return;
 
     // A non-MCP host may send a plain normalised type — pass it straight through.
@@ -135,6 +145,7 @@ export class MCPActivityProvider implements ActivityProvider {
         concurrency: signal.concurrency,
         size: signal.size,
         durationMs: signal.durationMs,
+        source: signal.source ?? this.id,
       });
       return;
     }
@@ -150,6 +161,7 @@ export class MCPActivityProvider implements ActivityProvider {
       concurrency: signal.concurrency ?? Math.max(1, this.inFlight),
       size: signal.size,
       durationMs: signal.durationMs ?? (signal.phase === "request" ? 1600 : 700),
+      source: signal.source ?? this.id,
     });
 
     if ((signal.phase === "result" || signal.phase === "error") && this.inFlight === 0) {

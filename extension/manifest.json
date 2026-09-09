@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Neural Orb Connector",
+  "version": "0.1.0",
+  "description": "Fait vivre votre sphère Neural Orb pendant que vous utilisez votre IA. Aucun texte, aucune conversation n'est lu ni envoyé.",
+  "permissions": ["storage"],
+  "host_permissions": ["http://127.0.0.1:4319/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://copilot.microsoft.com/*",
+        "https://m365.cloud.microsoft/chat/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
