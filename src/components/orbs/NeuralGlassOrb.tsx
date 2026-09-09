@@ -593,6 +593,36 @@ export function NeuralGlassOrb({
       // a link only shows once both of its nodes exist
       lo[k] = Math.min(1, Math.max(nodeOrder[pairs[k]!]!, nodeOrder[pairs[k + (k % 2 ? -1 : 1)]!]!) + 0.05);
     }
+
+    // travelling impulses: one spark per sampled link, several per busy link
+    const segCount = pairs.length / 2;
+    const sparkCount = Math.min(900, Math.max(120, Math.round(segCount * 0.55)));
+    const sp = new Float32Array(sparkCount * 3);
+    const sd = new Float32Array(sparkCount * 3);
+    const ss = new Float32Array(sparkCount);
+    const stt = new Float32Array(sparkCount);
+    const so = new Float32Array(sparkCount);
+    const sr = mulberry(sparkCount * 131 + count);
+    for (let i = 0; i < sparkCount; i++) {
+      const seg = Math.floor(sr() * segCount);
+      const ia = pairs[seg * 2]!;
+      const ib = pairs[seg * 2 + 1]!;
+      const a = pts[ia]!;
+      const b = pts[ib]!;
+      const flip = sr() > 0.5;
+      const from = flip ? b : a;
+      const to = flip ? a : b;
+      sp[i * 3] = from.x;
+      sp[i * 3 + 1] = from.y;
+      sp[i * 3 + 2] = from.z;
+      sd[i * 3] = to.x - from.x;
+      sd[i * 3 + 1] = to.y - from.y;
+      sd[i * 3 + 2] = to.z - from.z;
+      ss[i] = sr();
+      stt[i] = sr() > 0.7 ? 1 : nodeTint[ia]!;
+      so[i] = Math.min(1, Math.max(nodeOrder[ia]!, nodeOrder[ib]!) + 0.05);
+    }
+
     // electric arcs: jagged polylines hopping between distant nodes
     const boltCount = variant.bolts ?? 0;
     let bp: Float32Array | null = null;
