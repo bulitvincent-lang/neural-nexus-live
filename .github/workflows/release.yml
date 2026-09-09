@@ -41,16 +41,31 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install
 
+      - name: Build frontend
+        run: bun run build
+
+      - name: Verify frontend output
+        run: test -d dist/client && echo "dist/client ready"
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUST_BACKTRACE: 1
         with:
+          projectPath: ./src-tauri
           tagName: ${{ github.ref_name }}
           releaseName: "Neural Orb ${{ github.ref_name }}"
           releaseBody: "Download the installer for your platform below."
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
+
+      - name: Upload Tauri build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tauri-logs-${{ matrix.platform }}-${{ github.run_id }}
+          path: src-tauri/target/**/build.log
 
   connector:
     # Ships the browser companion (zip) alongside the installers,
