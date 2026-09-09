@@ -249,6 +249,25 @@ function buildNodes(v: OrbVariant, count: number) {
         t = 0.25 + s * 0.7;
         break;
       }
+      case "disc": {
+        // real galactic disc: flat sweeping arms + dense bulge, clearly not a shell
+        const arm = i % 3;
+        const s = Math.pow(rnd(), 0.65);
+        const radius = 0.14 + s * 0.86;
+        const theta = radius * 5.6 + (arm * Math.PI * 2) / 3 + (rnd() - 0.5) * 0.5;
+        const thick = (0.16 - radius * 0.11) * (rnd() - 0.5) * 2;
+        p = new THREE.Vector3(
+          Math.cos(theta) * radius,
+          thick + (rnd() - 0.5) * 0.03,
+          Math.sin(theta) * radius,
+        );
+        if (rnd() > 0.86) {
+          // sparse halo stars above and below the disc
+          p = fib(i, count).multiplyScalar(0.55 + rnd() * 0.45);
+        }
+        t = 1 - s * 0.85;
+        break;
+      }
       case "membrane": {
         const shell = 0.82 + Math.pow(rnd(), 2.2) * 0.16;
         p.multiplyScalar(shell);
