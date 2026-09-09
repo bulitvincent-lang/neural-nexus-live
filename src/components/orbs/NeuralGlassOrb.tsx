@@ -11,7 +11,15 @@ import { useOrbEngine, type OrbViewProps } from "./useOrbEngine";
  * fine filaments and travelling impulses.
  */
 
-export type Topology = "spiral" | "membrane" | "dendrite" | "ring" | "facet" | "filament" | "ribbon";
+export type Topology =
+  | "spiral"
+  | "disc"
+  | "membrane"
+  | "dendrite"
+  | "ring"
+  | "facet"
+  | "filament"
+  | "ribbon";
 
 export interface OrbVariant {
   topology: Topology;
@@ -29,9 +37,15 @@ export interface OrbVariant {
   spin: number;
   /** additive rim strength of the glass shell */
   rim: number;
+  /** draw the glass envelope at all (off for most orbs) */
+  shell?: boolean;
   rays?: boolean;
   satellites?: number;
   coreSize?: number;
+  /** number of electric arcs crackling inside the orb */
+  bolts?: number;
+  /** static tilt of the whole structure, in radians */
+  tilt?: number;
 }
 
 const NODE_VERT = /* glsl */ `
@@ -164,7 +178,41 @@ void main() {
   float body = pow(1.0 - f, 1.4);
   float flicker = 0.85 + 0.15 * sin(uTime * 2.1);
   vec3 col = mix(uMain, uHot, 0.35 + uActivity * 0.5) * (0.5 + body * 1.6) * flicker;
-  gl_FragColor = vec4(col * 0.7, (0.05 + body * 0.16) * (0.4 + uActivity * 0.6));
+  gl_FragColor = vec4(col * 0.55, (0.02 + body * 0.09) * (0.4 + uActivity * 0.6));
+}
+`;
+
+/** crackling electric arcs: each bolt flashes on its own rhythm */
+const BOLT_VERT = /* glsl */ `
+attribute float aSeed;
+attribute float aAlong;
+uniform float uTime;
+uniform float uActivity;
+varying float vI;
+void main() {
+  vec3 p = position;
+  // jitter the arc a little every flash so it never looks static
+  float j = sin(uTime * 9.0 + aSeed * 53.0 + aAlong * 17.0);
+  p += normalize(vec3(
+    sin(aSeed * 11.0), cos(aSeed * 7.0), sin(aSeed * 5.0)
+  )) * j * 0.018 * (0.4 + uActivity);
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mv;
+
+  float phase = fract(uTime * (0.28 + uActivity * 0.9) + aSeed);
+  float flash = pow(smoothstep(0.16, 0.0, phase), 1.5);
+  float travel = smoothstep(0.28, 0.0, abs(phase * 3.4 - aAlong));
+  vI = flash * (0.55 + uActivity) + travel * 0.55 * (0.3 + uActivity);
+}
+`;
+
+const BOLT_FRAG = /* glsl */ `
+uniform vec3 uHot;
+uniform vec3 uAccent;
+varying float vI;
+void main() {
+  vec3 col = mix(uAccent, uHot, 0.5) + vI * 0.5;
+  gl_FragColor = vec4(col * (0.5 + vI * 1.4), clamp(vI, 0.0, 1.0) * 0.85);
 }
 `;
 
@@ -201,6 +249,25 @@ function buildNodes(v: OrbVariant, count: number) {
           .multiplyScalar(0.62 + s * 0.36)
           .add(new THREE.Vector3(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5).multiplyScalar(jitter));
         t = 0.25 + s * 0.7;
+        break;
+      }
+      case "disc": {
+        // real galactic disc: flat sweeping arms + dense bulge, clearly not a shell
+        const arm = i % 3;
+        const s = Math.pow(rnd(), 0.65);
+        const radius = 0.14 + s * 0.86;
+        const theta = radius * 5.6 + (arm * Math.PI * 2) / 3 + (rnd() - 0.5) * 0.5;
+        const thick = (0.16 - radius * 0.11) * (rnd() - 0.5) * 2;
+        p = new THREE.Vector3(
+          Math.cos(theta) * radius,
+          thick + (rnd() - 0.5) * 0.03,
+          Math.sin(theta) * radius,
+        );
+        if (rnd() > 0.86) {
+          // sparse halo stars above and below the disc
+          p = fib(i, count).multiplyScalar(0.55 + rnd() * 0.45);
+        }
+        t = 1 - s * 0.85;
         break;
       }
       case "membrane": {
@@ -304,7 +371,8 @@ function buildLinks(pts: THREE.Vector3[], degree: number) {
         if (d < best[worst]!.d) best[worst] = { j, d };
       }
     }
-    for (const b of best) if (b.j > i) a.push(i, b.j);
+    // long links look like random polygons; keep the web local
+    for (const b of best) if (b.j > i && b.d < 0.16) a.push(i, b.j);
   }
   return a;
 }
@@ -350,7 +418,62 @@ export function NeuralGlassOrb({
       le[k] = k % 2;
       lt[k] = ls[k]! > 0.86 ? 1 : nodeTint[pairs[k]!]! * 0.8;
     }
-    return { count, nodePos, nodeSeed, nodeTint, nodeScale, lp, ls, le, lt };
+    // electric arcs: jagged polylines hopping between distant nodes
+    const boltCount = variant.bolts ?? 0;
+    let bp: Float32Array | null = null;
+    let bs: Float32Array | null = null;
+    let ba: Float32Array | null = null;
+    if (boltCount > 0 && pts.length > 8) {
+      const SEG = 9;
+      const verts = boltCount * SEG * 2;
+      bp = new Float32Array(verts * 3);
+      bs = new Float32Array(verts);
+      ba = new Float32Array(verts);
+      const br = mulberry(boltCount * 977 + count);
+      let w = 0;
+      for (let b = 0; b < boltCount; b++) {
+        const a = pts[Math.floor(br() * pts.length)]!;
+        // hop to a *nearby* node so the arc stays a short local crackle
+        let z = a;
+        let bestD = Infinity;
+        for (let tryI = 0; tryI < 24; tryI++) {
+          const cand = pts[Math.floor(br() * pts.length)]!;
+          const d = cand.distanceToSquared(a);
+          if (d > 0.004 && d < 0.05 && d < bestD) {
+            bestD = d;
+            z = cand;
+          }
+        }
+        const seed = br();
+        const off = new THREE.Vector3(br() - 0.5, br() - 0.5, br() - 0.5).normalize();
+        const path: THREE.Vector3[] = [];
+        for (let s = 0; s <= SEG; s++) {
+          const k = s / SEG;
+          const base = a.clone().lerp(z, k);
+          const bow = Math.sin(k * Math.PI);
+          base.addScaledVector(off, bow * 0.06 * (0.4 + seed));
+          base.add(
+            new THREE.Vector3(br() - 0.5, br() - 0.5, br() - 0.5).multiplyScalar(bow * 0.035),
+          );
+          path.push(base);
+        }
+        for (let s = 0; s < SEG; s++) {
+          for (const [pt, k] of [
+            [path[s]!, s / SEG] as const,
+            [path[s + 1]!, (s + 1) / SEG] as const,
+          ]) {
+            bp[w * 3] = pt.x;
+            bp[w * 3 + 1] = pt.y;
+            bp[w * 3 + 2] = pt.z;
+            bs[w] = seed;
+            ba[w] = k;
+            w++;
+          }
+        }
+      }
+    }
+
+    return { count, nodePos, nodeSeed, nodeTint, nodeScale, lp, ls, le, lt, bp, bs, ba };
   }, [variant, detail]);
 
   const rays = useMemo(() => {
@@ -376,7 +499,7 @@ export function NeuralGlassOrb({
       const r = 1.18 + rnd() * 0.22;
       return {
         p: [d.x * r, d.y * r * 0.7, d.z * r] as [number, number, number],
-        s: 0.012 + rnd() * 0.022,
+        s: 0.006 + rnd() * 0.009,
       };
     });
   }, [variant.satellites]);
@@ -439,6 +562,16 @@ export function NeuralGlassOrb({
     [col],
   );
 
+  const boltU = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uActivity: { value: 0 },
+      uHot: { value: col.hot },
+      uAccent: { value: col.accent },
+    }),
+    [col],
+  );
+
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
     clock.current += dt;
@@ -456,10 +589,13 @@ export function NeuralGlassOrb({
     glassU.uActivity.value = p.activityLevel;
     coreU.uTime.value = t;
     coreU.uActivity.value = p.activityLevel;
+    boltU.uTime.value = t;
+    boltU.uActivity.value = p.activityLevel;
 
     if (group.current) {
       group.current.rotation.y += dt * (variant.spin + p.rotationSpeed * 0.5);
-      group.current.rotation.x = Math.sin(t * 0.14) * 0.06;
+      group.current.rotation.x = (variant.tilt ?? 0) + Math.sin(t * 0.14) * 0.06;
+      group.current.rotation.z = (variant.tilt ?? 0) * 0.35;
     }
   });
 
@@ -467,18 +603,20 @@ export function NeuralGlassOrb({
 
   return (
     <group ref={group}>
-      {/* glass envelope */}
-      <mesh>
-        <sphereGeometry args={[1.03, 64, 64]} />
-        <shaderMaterial
-          vertexShader={GLASS_VERT}
-          fragmentShader={GLASS_FRAG}
-          uniforms={glassU}
-          transparent
-          depthWrite={false}
-          side={THREE.BackSide}
-        />
-      </mesh>
+      {/* glass envelope — only on orbs whose identity is a shell */}
+      {variant.shell ? (
+        <mesh>
+          <sphereGeometry args={[1.03, 64, 64]} />
+          <shaderMaterial
+            vertexShader={GLASS_VERT}
+            fragmentShader={GLASS_FRAG}
+            uniforms={glassU}
+            transparent
+            depthWrite={false}
+            side={THREE.BackSide}
+          />
+        </mesh>
+      ) : null}
       {/* inner luminous core */}
       <mesh>
         <sphereGeometry args={[coreSize, 32, 32]} />
@@ -528,6 +666,25 @@ export function NeuralGlassOrb({
         />
       </points>
 
+      {/* electric arcs */}
+      {geo.bp && geo.bs && geo.ba ? (
+        <lineSegments frustumCulled={false}>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" args={[geo.bp, 3]} />
+            <bufferAttribute attach="attributes-aSeed" args={[geo.bs, 1]} />
+            <bufferAttribute attach="attributes-aAlong" args={[geo.ba, 1]} />
+          </bufferGeometry>
+          <shaderMaterial
+            vertexShader={BOLT_VERT}
+            fragmentShader={BOLT_FRAG}
+            uniforms={boltU}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </lineSegments>
+      ) : null}
+
       {/* outward rays */}
       {rays ? (
         <lineSegments frustumCulled={false}>
@@ -548,7 +705,13 @@ export function NeuralGlassOrb({
       {satellites?.map((s, i) => (
         <mesh key={i} position={s.p} scale={s.s}>
           <sphereGeometry args={[1, 10, 10]} />
-          <meshBasicMaterial color={i % 3 === 0 ? variant.accent : variant.palette[1]} />
+          <meshBasicMaterial
+            color={i % 3 === 0 ? variant.accent : variant.palette[1]}
+            transparent
+            opacity={0.7}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
         </mesh>
       ))}
     </group>

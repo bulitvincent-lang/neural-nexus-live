@@ -1,17 +1,19 @@
 import { NeuralGlassOrb, type OrbVariant } from "./NeuralGlassOrb";
 import type { OrbViewProps } from "./useOrbEngine";
 
+/** Breathing cyan membrane, no shell — the surface itself is the object. */
 const VARIANT: OrbVariant = {
   topology: "membrane",
-  palette: ["#0a3a5c", "#22e0ff", "#d9fbff"],
-  accent: "#ffc06a",
+  palette: ["#08324f", "#22e0ff", "#eaffff"],
+  accent: "#7cf9ff",
   glass: "#5fe6ff",
-  nodes: 2600,
-  degree: 4,
-  breath: 0.055,
-  spin: 0.04,
-  rim: 1.35,
-  coreSize: 0.34,
+  nodes: 2800,
+  degree: 5,
+  breath: 0.07,
+  spin: 0.03,
+  rim: 1.0,
+  coreSize: 0.36,
+  bolts: 12,
 };
 
 export function LiquidOrb(props: OrbViewProps) {
