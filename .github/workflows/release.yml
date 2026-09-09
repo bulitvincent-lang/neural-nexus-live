@@ -69,7 +69,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tauri-logs-${{ matrix.platform }}-${{ github.run_id }}
-          path: src-tauri/target/**/build.log
+          path: |
+            src-tauri/target/**/build.log
+            src-tauri/target/**/.tauri/build.log
+            src-tauri/Cargo.toml
+            src-tauri/tauri.conf.json
 
   connector:
     # Ships the browser companion (zip) alongside the installers,
