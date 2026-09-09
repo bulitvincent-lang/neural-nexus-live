@@ -45,7 +45,7 @@ page swaps "Try the orb now" for real per-platform download buttons, and
 
 ## 4. Domain
 
-Publish the site from Lovable, then attach `neuralorb.app` in
+Publish the site from Lovable, then attach `neural-orb.com` in
 Project settings → Domains. Nothing else in the code needs to change; `SITE.url`
 and `SITE.domain` are the only places the name appears.
 

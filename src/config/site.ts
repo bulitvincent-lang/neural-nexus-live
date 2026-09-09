@@ -4,8 +4,8 @@
  */
 export const SITE = {
   name: "Neural Orb",
-  domain: "neuralorb.app",
-  url: "https://neuralorb.app",
+  domain: "neural-orb.com",
+  url: "https://neural-orb.com",
   tagline: "See your AI live and work.",
   /** GitHub releases (or any static host) that serves the packaged installers. */
   releaseBase: "https://github.com/bulitvincent-lang/neuralorb/releases/latest/download",
