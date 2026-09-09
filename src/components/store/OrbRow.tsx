@@ -133,8 +133,11 @@ export function OrbRow({
               Close
             </button>
           </div>
-          <div className="relative min-h-0 flex-1" onClick={(e) => e.stopPropagation()}>
-            <div className="absolute inset-0">
+          <div
+            className="flex min-h-0 flex-1 items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="aspect-square h-[68vh] max-h-[68vw] w-auto">
               <OrbStage orbId={enlarged.id} mode="preview" detail={1} bloom={0.2} />
             </div>
           </div>
