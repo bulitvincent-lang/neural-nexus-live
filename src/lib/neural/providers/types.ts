@@ -15,16 +15,17 @@ import type { ActivityEventType, AgentActivityEvent } from "../types";
 export interface RawActivitySignal {
   /** normalised type, or any alias the bridge can resolve (e.g. "STREAMING") */
   type: ActivityEventType | string;
-  intensity?: number;
-  duration?: number;
-  durationMs?: number;
-  parallelTasks?: number;
-  concurrency?: number;
-  complexity?: number;
+  intensity?: number | undefined;
+  duration?: number | undefined;
+  durationMs?: number | undefined;
+  parallelTasks?: number | undefined;
+  concurrency?: number | undefined;
+  complexity?: number | undefined;
   /** optional payload size in bytes — used to infer complexity */
-  size?: number;
-  timestamp?: number;
+  size?: number | undefined;
+  timestamp?: number | undefined;
 }
+
 
 export type ActivityEmit = (signal: RawActivitySignal) => void;
 
