@@ -1,3 +1,5 @@
+import type { OrbId } from "@/lib/orbs/types";
+
 /**
  * Single source of truth for every price in Neural Orb.
  * No monthly plan, no tiers, no per-orb pricing.
@@ -8,8 +10,31 @@ export const TRIAL_DAYS = 7;
 export const CURRENCY = "EUR";
 export const CURRENCY_SYMBOL = "€";
 
-/** Flip to true only once a real Stripe checkout is connected. */
-export const PAYMENTS_ENABLED = false;
+/** Real checkout is live: prices exist in the payment system. */
+export const PAYMENTS_ENABLED = true;
+
+/** Subscription price id in the payment system. */
+export const SUBSCRIPTION_PRICE_ID = "neural_orb_yearly";
+
+/** One-time price id per purchasable orb. Neural is included, so it has none. */
+export const ORB_PRICE_IDS: Partial<Record<OrbId, string>> = {
+  galaxy: "orb_galaxy_onetime",
+  liquid: "orb_liquid_onetime",
+  synapse: "orb_synapse_onetime",
+  singularity: "orb_singularity_onetime",
+  crystal: "orb_crystal_onetime",
+  plasma: "orb_plasma_onetime",
+  aurora: "orb_aurora_onetime",
+};
+
+/** Reverse map, used by the payment webhook to know which orb was bought. */
+export const ORB_BY_PRICE_ID: Record<string, OrbId> = Object.entries(ORB_PRICE_IDS).reduce(
+  (acc, [orbId, priceId]) => {
+    if (priceId) acc[priceId] = orbId as OrbId;
+    return acc;
+  },
+  {} as Record<string, OrbId>,
+);
 
 export function formatPrice(amount: number): string {
   const fixed = Number.isInteger(amount) ? String(amount) : amount.toFixed(2).replace(".", ",");
