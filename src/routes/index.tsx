@@ -50,7 +50,7 @@ function LandingPage() {
   }, []);
 
   const primary = DOWNLOADS.find((d) => d.id === platform) ?? DOWNLOADS[0];
-  const others = DOWNLOADS.filter((d) => d !== primary);
+  
   const ready = SITE.releaseReady;
 
   const features = [
@@ -92,14 +92,32 @@ function LandingPage() {
 
         <div className="mt-10 flex flex-col items-center gap-4">
           {ready ? (
-            <a
-              href={downloadUrl(primary)}
-              className="group relative inline-flex items-center gap-3 rounded-full border border-[#7ceaff]/30 bg-[#101a30]/60 px-8 py-4 text-sm tracking-wide backdrop-blur transition-all hover:border-[#7ceaff]/70 hover:shadow-[0_0_40px_-8px_rgba(124,234,255,0.5)]"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#7ceaff] shadow-[0_0_12px_2px_rgba(124,234,255,0.8)]" />
-              {t("hero.download", { platform: primary.label })}
-              <span className="text-[#9db9de]">{primary.note}</span>
-            </a>
+            <div className="flex flex-col items-center gap-3 sm:flex-row">
+              <label className="relative">
+                <span className="sr-only">Choose your system</span>
+                <select
+                  value={platform}
+                  onChange={(e) => setPlatform(e.target.value as PlatformId)}
+                  className="appearance-none rounded-full border border-white/15 bg-[#101a30]/70 py-4 pl-6 pr-11 text-sm text-[#dcebff] backdrop-blur transition-colors hover:border-white/35 focus:border-[#7ceaff]/60 focus:outline-none"
+                >
+                  {DOWNLOADS.map((d) => (
+                    <option key={d.id} value={d.id} className="bg-[#101a30] text-[#dcebff]">
+                      {d.label} — {d.note}
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-[#9db9de]">
+                  ▼
+                </span>
+              </label>
+              <a
+                href={downloadUrl(primary)}
+                className="group relative inline-flex items-center gap-3 rounded-full border border-[#7ceaff]/30 bg-[#101a30]/60 px-8 py-4 text-sm tracking-wide backdrop-blur transition-all hover:border-[#7ceaff]/70 hover:shadow-[0_0_40px_-8px_rgba(124,234,255,0.5)]"
+              >
+                <span className="h-2 w-2 rounded-full bg-[#7ceaff] shadow-[0_0_12px_2px_rgba(124,234,255,0.8)]" />
+                {t("hero.download", { platform: primary.label })}
+              </a>
+            </div>
           ) : (
             <Link
               to="/orb"
@@ -111,19 +129,7 @@ function LandingPage() {
             </Link>
           )}
 
-          {ready ? (
-            <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-[11px] text-[#8ba4c4]">
-              {others.map((d) => (
-                <a
-                  key={d.id + d.file}
-                  href={downloadUrl(d)}
-                  className="transition-colors hover:text-[#dcebff]"
-                >
-                  {d.label} · {d.note}
-                </a>
-              ))}
-            </div>
-          ) : (
+          {!ready && (
             <p className="max-w-md text-[11px] leading-relaxed text-[#8ba4c4]">
               {t("hero.soon")}
             </p>

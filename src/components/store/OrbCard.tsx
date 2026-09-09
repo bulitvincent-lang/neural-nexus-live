@@ -1,3 +1,4 @@
+import { OrbThumb } from "@/components/store/OrbThumb";
 import { ORB_PRICE, PAYMENTS_ENABLED, formatPrice } from "@/config/pricing";
 import type { Orb, OrbState } from "@/lib/orbs/types";
 
@@ -21,23 +22,11 @@ export function OrbCard({
   onBuy: () => void;
 }) {
   const owned = state !== "available";
-  const [a, b] = orb.thumb;
-
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#182238]/85">
-      <div
-        className="relative h-40 w-full"
-        style={{
-          background: `radial-gradient(circle at 50% 55%, ${a}55 0%, ${b}33 42%, rgba(6,10,20,0.95) 78%)`,
-        }}
-      >
-        <div
-          className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[2px]"
-          style={{
-            background: `radial-gradient(circle at 42% 38%, ${a} 0%, ${b} 55%, transparent 72%)`,
-            opacity: 0.85,
-          }}
-        />
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#182238]/85 transition-all duration-500 hover:-translate-y-0.5 hover:border-white/25 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.9)]">
+      <div className="relative h-48 w-full">
+        <OrbThumb orb={orb} className="h-full w-full" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_-10%,transparent_40%,rgba(6,10,20,0.55)_100%)]" />
         {active ? (
           <span className="absolute right-3 top-3 rounded-full bg-white/15 px-3 py-1 text-[10px] tracking-[0.2em] text-white">
             IN USE
