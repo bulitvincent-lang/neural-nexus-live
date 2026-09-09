@@ -41,10 +41,10 @@ uniform float uActivity;
 varying float vGlow;
 varying float vPulse;
 void main() {
-  float idle = 0.22 + vPulse * 0.13;
-  float intensity = idle + uActivity * 0.55 + vGlow * 2.4;
-  float alpha = 0.20 + uActivity * 0.22 + vGlow * 0.62;
-  gl_FragColor = vec4(uColor * (0.5 + intensity * 0.9), clamp(alpha, 0.0, 0.75));
+  float idle = 0.10 + vPulse * 0.08;
+  float intensity = idle + uActivity * 0.30 + vGlow * 1.5;
+  float alpha = 0.10 + uActivity * 0.14 + vGlow * 0.5;
+  gl_FragColor = vec4(uColor * (0.5 + intensity * 1.1), clamp(alpha, 0.0, 1.0));
 }
 `;
 
@@ -59,10 +59,10 @@ void main() {
   float d = distance(p, uMouse);
   float proximity = (1.0 - smoothstep(0.0, 0.75, d)) * uHover;
   float pulse = 0.5 + 0.5 * sin(uTime * 2.4 + position.x * 8.0 + position.y * 6.0);
-  float strength = 0.3 + proximity * 1.7 + uActivity * 0.6 + pulse * 0.16;
+  float strength = 0.18 + proximity * 1.3 + uActivity * 0.45 + pulse * 0.12;
   vStrength = strength;
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  gl_PointSize = (0.6 + strength * 0.9) * (16.0 / -mv.z);
+  gl_PointSize = (1.6 + strength * 2.6) * (120.0 / -mv.z);
   gl_Position = projectionMatrix * mv;
 }
 `;
@@ -77,8 +77,8 @@ void main() {
   if (d > 0.5) discard;
   float core = smoothstep(0.24, 0.0, d);
   float halo = smoothstep(0.5, 0.05, d);
-  vec3 color = mix(uPrimary, uSecondary, core) * (0.8 + vStrength * 1.2);
-  gl_FragColor = vec4(color, halo * min(0.9, 0.22 + vStrength * 0.5));
+  vec3 color = mix(uPrimary, uSecondary, core) * (0.7 + vStrength * 1.2);
+  gl_FragColor = vec4(color, halo * min(0.85, 0.22 + vStrength * 0.6));
 }
 `;
 
@@ -88,7 +88,7 @@ varying float vB;
 void main() {
   vB = aBright;
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
-  gl_PointSize = (1.2 + aBright * 1.6) * (18.0 / -mv.z);
+  gl_PointSize = (3.5 + aBright * 5.0) * (120.0 / -mv.z);
   gl_Position = projectionMatrix * mv;
 }
 `;
@@ -105,68 +105,11 @@ void main() {
   float halo = pow(smoothstep(0.5, 0.0, d), 1.7);
   vec3 col = mix(uAccent, uHot, core);
   col = mix(col, vec3(1.0), 0.30);
-  gl_FragColor = vec4(col * (1.3 + vB * 1.4), clamp(core + halo * 0.5, 0.0, 1.0));
+  gl_FragColor = vec4(col * (1.0 + vB * 1.4), clamp(core * 0.9 + halo * 0.4, 0.0, 1.0));
 }
 `;
 
-export type GlowTopology =
-  | "spiral"
-  | "disc"
-  | "membrane"
-  | "dendrite"
-  | "ring"
-  | "facet"
-  | "shard"
-  | "filament"
-  | "ribbon";
-
-/** each orb keeps its own silhouette while sharing the luminous layer */
-function shape(topology: GlowTopology, p: THREE.Vector3, i: number) {
-  switch (topology) {
-    case "disc":
-    case "spiral": {
-      // flattened galactic disc with swirling arms
-      const r = Math.sqrt(p.x * p.x + p.z * p.z);
-      const a = Math.atan2(p.z, p.x) + r * 2.4;
-      p.set(Math.cos(a) * r, p.y * 0.22 + Math.sin(r * 5.0) * 0.05, Math.sin(a) * r);
-      break;
-    }
-    case "ring": {
-      // equatorial belt plus a sparse halo
-      if (i % 3 !== 0) p.y *= 0.16;
-      break;
-    }
-    case "ribbon": {
-      // wide flowing aurora bands
-      p.y += Math.sin(p.x * 3.1 + p.z * 2.2) * 0.16;
-      break;
-    }
-    case "membrane": {
-      // rippling liquid surface
-      const k = 1 + Math.sin(p.x * 4.2) * 0.05 + Math.cos(p.y * 3.6) * 0.05;
-      p.multiplyScalar(k);
-      break;
-    }
-    case "dendrite": {
-      // radial branches of different lengths
-      p.multiplyScalar(0.62 + ((i * 37) % 11) / 24);
-      break;
-    }
-    case "facet":
-    case "shard": {
-      // faceted crystal: quantised radius
-      const q = 0.72 + Math.round((((i * 53) % 17) / 17) * 4) / 5.2;
-      p.multiplyScalar(q);
-      break;
-    }
-    case "filament":
-      p.multiplyScalar(0.9 + Math.sin(i * 0.7) * 0.08);
-      break;
-  }
-  return p;
-}
-
-function buildGraph(nodeCount: number, radius: number, topology: GlowTopology) {
+function buildGraph(nodeCount: number, radius: number) {
   const pts: THREE.Vector3[] = [];
   const golden = Math.PI * (3 - Math.sqrt(5));
   for (let i = 0; i < nodeCount; i++) {
@@ -175,7 +118,7 @@ function buildGraph(nodeCount: number, radius: number, topology: GlowTopology) {
     const theta = golden * i;
     const p = new THREE.Vector3(Math.cos(theta) * r, y, Math.sin(theta) * r);
     const noise = 1 + Math.sin(i * 1.731) * 0.018 + Math.sin(i * 0.417) * 0.012;
-    pts.push(shape(topology, p.multiplyScalar(radius * noise), i));
+    pts.push(p.multiplyScalar(radius * noise));
   }
 
   const seen = new Set<string>();
@@ -226,7 +169,6 @@ function buildGraph(nodeCount: number, radius: number, topology: GlowTopology) {
 
 export function NeuralGlowLayer({
   state,
-  topology,
   primary,
   secondary,
   hot,
@@ -235,7 +177,6 @@ export function NeuralGlowLayer({
   pulses = 42,
 }: {
   state: GlowState;
-  topology: GlowTopology;
   primary: string;
   secondary: string;
   hot: string;
@@ -243,10 +184,7 @@ export function NeuralGlowLayer({
   nodeCount?: number;
   pulses?: number;
 }) {
-  const graph = useMemo(
-    () => buildGraph(nodeCount, radius, topology),
-    [nodeCount, radius, topology],
-  );
+  const graph = useMemo(() => buildGraph(nodeCount, radius), [nodeCount, radius]);
 
   const col = useMemo(
     () => ({

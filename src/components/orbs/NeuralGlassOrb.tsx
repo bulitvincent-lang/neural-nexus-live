@@ -953,27 +953,85 @@ export function NeuralGlassOrb({
           />
         </mesh>
       ) : null}
-      {/* inner luminous core — kept small and soft so it never blows out */}
+      {/* inner luminous core */}
       <mesh>
-        <sphereGeometry args={[coreSize * 0.55, 24, 24]} />
-        <meshBasicMaterial
-          color={variant.palette[2]}
+        <sphereGeometry args={[coreSize, 32, 32]} />
+        <shaderMaterial
+          vertexShader={CORE_VERT}
+          fragmentShader={CORE_FRAG}
+          uniforms={coreU}
           transparent
-          opacity={0.32}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
         />
       </mesh>
 
+      {/* link web */}
+      <lineSegments frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[geo.lp, 3]} />
+          <bufferAttribute attach="attributes-aSeed" args={[geo.ls, 1]} />
+          <bufferAttribute attach="attributes-aEnd" args={[geo.le, 1]} />
+          <bufferAttribute attach="attributes-aTint" args={[geo.lt, 1]} />
+            <bufferAttribute attach="attributes-aOrder" args={[geo.lo, 1]} />
+        </bufferGeometry>
+        <shaderMaterial
+          vertexShader={LINK_VERT}
+          fragmentShader={LINK_FRAG}
+          uniforms={linkU}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </lineSegments>
+
       {/* shared luminous neural layer: glowing web, bright nodes and
           impulses that really travel along the connections */}
       <NeuralGlowLayer
         state={glow}
-        topology={variant.topology}
         primary={variant.palette[1]}
         secondary={variant.accent}
         hot={variant.palette[2]}
       />
+
+      {/* nodes */}
+
+      <points frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[geo.nodePos, 3]} />
+          <bufferAttribute attach="attributes-aSeed" args={[geo.nodeSeed, 1]} />
+          <bufferAttribute attach="attributes-aTint" args={[geo.nodeTint, 1]} />
+          <bufferAttribute attach="attributes-aScale" args={[geo.nodeScale, 1]} />
+            <bufferAttribute attach="attributes-aOrder" args={[geo.nodeOrder, 1]} />
+        </bufferGeometry>
+        <shaderMaterial
+          vertexShader={NODE_VERT}
+          fragmentShader={NODE_FRAG}
+          uniforms={nodeU}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+
+      {/* electric arcs */}
+      {geo.bp && geo.bs && geo.ba ? (
+        <lineSegments frustumCulled={false}>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" args={[geo.bp, 3]} />
+            <bufferAttribute attach="attributes-aSeed" args={[geo.bs, 1]} />
+            <bufferAttribute attach="attributes-aAlong" args={[geo.ba, 1]} />
+          </bufferGeometry>
+          <shaderMaterial
+            vertexShader={BOLT_VERT}
+            fragmentShader={BOLT_FRAG}
+            uniforms={boltU}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </lineSegments>
+      ) : null}
 
       {/* outward rays + satellites appear with the structure */}
       <group ref={extras}>
