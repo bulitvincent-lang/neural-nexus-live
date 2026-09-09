@@ -18,7 +18,7 @@ import {
 } from "./shaders";
 
 /** Cluster -> palette index: cold hues dominate, amber only once. */
-const TONE_BY_CLUSTER = [0, 1, 2, 4, 1, 0, 2, 4, 3];
+const TONE_BY_CLUSTER = [0, 1, 2, 4, 1, 0, 2, 4, 1, 2, 0, 4, 1, 5];
 
 /** CPU mirror of the GLSL displace() so pulses ride exactly on the edges. */
 function displace(
@@ -225,7 +225,7 @@ export function NeuralSphere({
     const decay = Math.exp(-dt * (1.1 + 1.4 * p.activityLevel));
     for (let i = 0; i < N; i++) {
       nodeAct[i] *= decay;
-      const base = 0.02 + 0.55 * p.nodeActivation * p.clusterActivation[net.nodes[i].cluster];
+      const base = 0.05 + 0.6 * p.nodeActivation * p.clusterActivation[net.nodes[i].cluster];
       if (nodeAct[i] < base) nodeAct[i] += (base - nodeAct[i]) * Math.min(1, dt * 2.2);
       if (p.waveStrength > 0.01 && Math.abs(nodeRadius[i] - p.waveRadius) < 0.14) {
         nodeAct[i] = Math.min(1, nodeAct[i] + p.waveStrength * 0.9);

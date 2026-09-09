@@ -53,7 +53,7 @@ void main() {
   float core = smoothstep(0.5, 0.0, d);
   float glow = pow(core, 3.0);
   float depthFade = mix(1.0, 0.28, vDepth);
-  float a = (0.06 + 0.55 * vAct) * (glow * 0.95 + core * 0.2) * depthFade;
+  float a = (0.11 + 0.6 * vAct) * (glow * 0.95 + core * 0.2) * depthFade;
   gl_FragColor = vec4(vColor * (0.45 + 1.1 * vAct), a);
 }
 `;

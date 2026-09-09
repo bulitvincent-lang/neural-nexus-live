@@ -43,7 +43,7 @@ function mulberry(seed: number) {
   };
 }
 
-export function buildNetwork(nodeCount: number, neighbors: number, clusterCount = 9): NeuralNetwork {
+export function buildNetwork(nodeCount: number, neighbors: number, clusterCount = 14): NeuralNetwork {
   const rand = mulberry(20260909);
   const gauss = () => {
     const u = Math.max(1e-6, rand());
@@ -68,7 +68,7 @@ export function buildNetwork(nodeCount: number, neighbors: number, clusterCount 
     const seed = clusters[c];
     const dl = Math.hypot(seed.x, seed.y, seed.z) || 1;
     // dense blob around the cluster direction, biased towards the shell
-    const spread = 0.17 + rand() * 0.1;
+    const spread = 0.2 + rand() * 0.12;
     let dx = seed.x / dl + gauss() * spread;
     let dy = seed.y / dl + gauss() * spread;
     let dz = seed.z / dl + gauss() * spread;
