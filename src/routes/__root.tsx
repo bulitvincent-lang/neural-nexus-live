@@ -80,7 +80,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Neural Orb — See your AI live and work" },
       { name: "description", content: "A living neural sphere on your desktop that shows your AI working, in real time." },
-      { name: "author", content: "Lovable" },
+      { name: "author", content: "Neural Orb" },
+      {
+        name: "google-site-verification",
+        content: "96Hf0nKlqQh0r_hIGL5koK9xkLsG7ujxWZVKeRJQEc4",
+      },
       { property: "og:title", content: "Neural Orb — See your AI live and work" },
       { property: "og:description", content: "A silent, living sphere showing your AI's activity." },
       { property: "og:type", content: "website" },
