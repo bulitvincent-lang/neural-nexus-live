@@ -415,7 +415,52 @@ export function NeuralGlassOrb({
       le[k] = k % 2;
       lt[k] = ls[k]! > 0.86 ? 1 : nodeTint[pairs[k]!]! * 0.8;
     }
-    return { count, nodePos, nodeSeed, nodeTint, nodeScale, lp, ls, le, lt };
+    // electric arcs: jagged polylines hopping between distant nodes
+    const boltCount = variant.bolts ?? 0;
+    let bp: Float32Array | null = null;
+    let bs: Float32Array | null = null;
+    let ba: Float32Array | null = null;
+    if (boltCount > 0 && pts.length > 8) {
+      const SEG = 9;
+      const verts = boltCount * SEG * 2;
+      bp = new Float32Array(verts * 3);
+      bs = new Float32Array(verts);
+      ba = new Float32Array(verts);
+      const br = mulberry(boltCount * 977 + count);
+      let w = 0;
+      for (let b = 0; b < boltCount; b++) {
+        const a = pts[Math.floor(br() * pts.length)]!;
+        const z = pts[Math.floor(br() * pts.length)]!;
+        const seed = br();
+        const off = new THREE.Vector3(br() - 0.5, br() - 0.5, br() - 0.5).normalize();
+        const path: THREE.Vector3[] = [];
+        for (let s = 0; s <= SEG; s++) {
+          const k = s / SEG;
+          const base = a.clone().lerp(z, k);
+          const bow = Math.sin(k * Math.PI);
+          base.addScaledVector(off, bow * 0.18 * (0.4 + seed));
+          base.add(
+            new THREE.Vector3(br() - 0.5, br() - 0.5, br() - 0.5).multiplyScalar(bow * 0.09),
+          );
+          path.push(base);
+        }
+        for (let s = 0; s < SEG; s++) {
+          for (const [pt, k] of [
+            [path[s]!, s / SEG] as const,
+            [path[s + 1]!, (s + 1) / SEG] as const,
+          ]) {
+            bp[w * 3] = pt.x;
+            bp[w * 3 + 1] = pt.y;
+            bp[w * 3 + 2] = pt.z;
+            bs[w] = seed;
+            ba[w] = k;
+            w++;
+          }
+        }
+      }
+    }
+
+    return { count, nodePos, nodeSeed, nodeTint, nodeScale, lp, ls, le, lt, bp, bs, ba };
   }, [variant, detail]);
 
   const rays = useMemo(() => {
