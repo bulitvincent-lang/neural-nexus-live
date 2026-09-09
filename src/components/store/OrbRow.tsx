@@ -138,7 +138,7 @@ export function OrbRow({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="aspect-square h-[68vh] max-h-[68vw] w-auto">
-              <OrbStage orbId={enlarged.id} mode="preview" detail={1} bloom={0.2} />
+              <OrbStage key={enlarged.id} orbId={enlarged.id} mode="preview" detail={1} bloom={0.2} />
             </div>
           </div>
           <div className="flex items-center justify-center gap-3 px-6 pb-8" onClick={(e) => e.stopPropagation()}>

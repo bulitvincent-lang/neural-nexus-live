@@ -84,6 +84,7 @@ export function OrbStage({
       frameloop={visible ? "always" : "never"}
       camera={camera}
       performance={{ min: 0.6 }}
+      resize={{ debounce: 0, scroll: false }}
       gl={{
         antialias: true,
         alpha: true,
