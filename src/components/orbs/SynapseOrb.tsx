@@ -24,7 +24,7 @@ void main() {
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   float alive = smoothstep(uGrowth, uGrowth - 0.12, aGrow);
   float breathe = 0.62 + 0.38 * sin(uTime * (0.9 + aSeed) + aSeed * 9.0);
-  vA = alive * (0.10 + 0.42 * uActivity + 0.12 * breathe) * (1.15 - aDepth * 0.5);
+  vA = alive * (0.16 + 0.5 * uActivity + 0.14 * breathe) * (1.15 - aDepth * 0.5);
   vDepth = aDepth;
 }
 `;
@@ -47,7 +47,7 @@ void main() {
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
   gl_Position = projectionMatrix * mv;
   vE = aEnergy;
-  gl_PointSize = uSize * (0.6 + aEnergy) * (250.0 / -mv.z);
+  gl_PointSize = uSize * (0.6 + aEnergy) * (70.0 / -mv.z);
 }
 `;
 
@@ -59,7 +59,7 @@ void main() {
   if (d > 0.5) discard;
   float a = smoothstep(0.5, 0.0, d);
   vec3 col = mix(vec3(0.55, 1.0, 0.78), vec3(1.0), 0.35 * vE);
-  gl_FragColor = vec4(col * (0.6 + vE), a * a * clamp(vE, 0.0, 1.0));
+  gl_FragColor = vec4(col * (0.55 + vE * 0.5), a * a * clamp(vE, 0.0, 1.0) * 0.55);
 }
 `;
 
@@ -120,7 +120,7 @@ export function SynapseOrb({ engineRef, detail = 1 }: OrbViewProps) {
   const growth = useRef(0.35);
 
   const data = useMemo(() => {
-    const segs = buildDendrites(detail < 0.7 ? 5 : 8, detail < 0.7 ? 4 : 5);
+    const segs = buildDendrites(detail < 0.7 ? 7 : 9, detail < 0.7 ? 4 : 5);
     const E = segs.length;
     const pos = new Float32Array(E * 6);
     const grow = new Float32Array(E * 2);
@@ -184,7 +184,7 @@ export function SynapseOrb({ engineRef, detail = 1 }: OrbViewProps) {
     branchUniforms.uTime.value = clock.current;
     branchUniforms.uGrowth.value = growth.current;
     branchUniforms.uActivity.value = p.activityLevel;
-    pulseUniforms.uSize.value = 2.6 + p.glowIntensity * 2.0;
+    pulseUniforms.uSize.value = 2.2 + p.glowIntensity * 1.2;
 
     // synaptic firing from the trunks
     let toSpawn = (2 + p.pulseCount * 34) * dt;

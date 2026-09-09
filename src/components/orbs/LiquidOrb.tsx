@@ -89,9 +89,9 @@ void main() {
   vec3 crest = vec3(0.62, 1.0, 0.94);
   vec3 col = mix(deep, mid, lam);
   col = mix(col, crest, clamp(vDisp * 5.0 + fres * 0.55, 0.0, 1.0));
-  col += crest * fres * (0.35 + uGlow * 0.7);
-  float alpha = 0.22 + fres * 0.7 + lam * 0.28 + uActivity * 0.14;
-  gl_FragColor = vec4(col * (0.7 + uGlow * 0.8), clamp(alpha, 0.0, 0.96));
+  col += crest * fres * (0.22 + uGlow * 0.35);
+  float alpha = 0.30 + fres * 0.5 + lam * 0.22 + uActivity * 0.12;
+  gl_FragColor = vec4(col * (0.55 + uGlow * 0.35), clamp(alpha, 0.0, 0.92));
 }
 `;
 
@@ -126,7 +126,7 @@ export function LiquidOrb({ engineRef, detail = 1 }: OrbViewProps) {
     [],
   );
 
-  const segments = detail < 0.7 ? 3 : 5;
+  const segments = detail < 0.7 ? 4 : 6;
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
