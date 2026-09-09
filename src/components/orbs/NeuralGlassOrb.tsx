@@ -180,6 +180,40 @@ void main() {
 }
 `;
 
+/** crackling electric arcs: each bolt flashes on its own rhythm */
+const BOLT_VERT = /* glsl */ `
+attribute float aSeed;
+attribute float aAlong;
+uniform float uTime;
+uniform float uActivity;
+varying float vI;
+void main() {
+  vec3 p = position;
+  // jitter the arc a little every flash so it never looks static
+  float j = sin(uTime * 9.0 + aSeed * 53.0 + aAlong * 17.0);
+  p += normalize(vec3(
+    sin(aSeed * 11.0), cos(aSeed * 7.0), sin(aSeed * 5.0)
+  )) * j * 0.018 * (0.4 + uActivity);
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mv;
+
+  float phase = fract(uTime * (0.28 + uActivity * 0.9) + aSeed);
+  float flash = pow(smoothstep(0.16, 0.0, phase), 1.5);
+  float travel = smoothstep(0.28, 0.0, abs(phase * 3.4 - aAlong));
+  vI = flash * (0.55 + uActivity) + travel * 0.55 * (0.3 + uActivity);
+}
+`;
+
+const BOLT_FRAG = /* glsl */ `
+uniform vec3 uHot;
+uniform vec3 uAccent;
+varying float vI;
+void main() {
+  vec3 col = mix(uAccent, uHot, 0.5) + vI * 0.5;
+  gl_FragColor = vec4(col * (0.5 + vI * 1.4), clamp(vI, 0.0, 1.0) * 0.85);
+}
+`;
+
 function fib(i: number, n: number) {
   const y = 1 - (2 * (i + 0.5)) / n;
   const r = Math.sqrt(Math.max(0, 1 - y * y));
