@@ -31,7 +31,7 @@ void main() {
   float heat = clamp((0.95 - r) * 1.5, 0.0, 1.0);
   vI = (0.28 + 0.85 * uActivity) * (0.35 + heat) + uConverge * 0.4;
   vR = r;
-  gl_PointSize = uSize * (0.6 + heat) * (75.0 / -mv.z);
+  gl_PointSize = uSize * (0.6 + heat) * (38.0 / -mv.z);
 }
 `;
 
@@ -46,7 +46,7 @@ void main() {
   vec3 hot = vec3(1.0, 0.78, 0.42);
   vec3 cool = vec3(0.48, 0.42, 1.0);
   vec3 col = mix(hot, cool, clamp((vR - 0.35) * 1.2, 0.0, 1.0));
-  gl_FragColor = vec4(col * (0.55 + vI * 0.55), a * a * clamp(vI, 0.0, 1.0) * 0.4);
+  gl_FragColor = vec4(col * (0.55 + vI * 0.55), a * a * clamp(vI, 0.0, 1.0) * 0.05);
 }
 `;
 
@@ -122,7 +122,7 @@ export function SingularityOrb({ engineRef, detail = 1 }: OrbViewProps) {
     matterUniforms.uTime.value = clock.current;
     matterUniforms.uActivity.value = p.activityLevel;
     matterUniforms.uConverge.value = Math.min(1, p.convergenceLevel + p.waveStrength * 0.4);
-    matterUniforms.uSize.value = 1.9 + p.glowIntensity * 1.4;
+    matterUniforms.uSize.value = 1.5 + p.glowIntensity * 1.0;
     ringUniforms.uTime.value = clock.current;
     ringUniforms.uActivity.value = p.activityLevel;
     ringUniforms.uGlow.value = p.glowIntensity;
@@ -130,7 +130,7 @@ export function SingularityOrb({ engineRef, detail = 1 }: OrbViewProps) {
       const s = 0.34 - p.convergenceLevel * 0.02;
       core.current.scale.setScalar(s / 0.34);
     }
-    if (halo.current) halo.current.opacity = 0.05 + p.activityLevel * 0.14;
+    if (halo.current) halo.current.opacity = 0.025 + p.activityLevel * 0.06;
     if (group.current) {
       group.current.rotation.y += dt * (0.04 + p.rotationSpeed * 0.5);
       group.current.rotation.x = -0.34 + Math.sin(clock.current * 0.07) * 0.06;

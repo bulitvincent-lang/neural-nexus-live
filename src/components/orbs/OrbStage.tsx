@@ -43,7 +43,7 @@ export function OrbStage({
   detail,
   managed = false,
   interactive = true,
-  bloom = 0.38,
+  bloom = 0.26,
 }: OrbStageProps) {
   const engineRef = useRef<NeuralEngine | null>(null);
   const [visible, setVisible] = useState(true);
@@ -113,7 +113,7 @@ export function OrbStage({
       <EffectComposer enableNormalPass={false} multisampling={4}>
         <Bloom
           intensity={bloom}
-          luminanceThreshold={0.82}
+          luminanceThreshold={0.9}
           luminanceSmoothing={0.4}
           mipmapBlur
           radius={0.5}
