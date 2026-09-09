@@ -10,7 +10,6 @@ import { startDefaultProviders } from "@/lib/neural/providers";
 import { runPreviewScript } from "@/lib/orbs/previewScript";
 import type { OrbId } from "@/lib/orbs/types";
 import type { OrbViewProps } from "./useOrbEngine";
-import { PaidOrbAccents } from "./PaidOrbAccents";
 
 /** Every orb shares this contract, so only the selected one is ever loaded. */
 type OrbComponent = React.ComponentType<OrbViewProps>;
@@ -103,9 +102,8 @@ export function OrbStage({
           <Lightformer intensity={1.7} color="#6b62ff" position={[-3, 0, 1]} rotation-y={Math.PI / 2} scale={[3, 2, 1]} />
           <Lightformer intensity={1.2} color="#ffae55" position={[3, -1, 0]} rotation-y={-Math.PI / 2} scale={[2, 1, 1]} />
         </Environment>
-        <group scale={orbId === "neural" ? 1 : 1.08}>
+        <group>
           <Orb engineRef={engineRef} detail={quality} />
-          {orbId !== "neural" ? <PaidOrbAccents orbId={orbId} /> : null}
         </group>
       </Suspense>
       <AdaptiveDpr pixelated={false} />

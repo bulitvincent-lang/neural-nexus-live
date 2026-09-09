@@ -182,3 +182,17 @@ svg .orb-breathe { animation: orb-breathe-svg 6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .orb-breathe, .orb-pulse, .orb-spin-slow, .orb-drift, .orb-flicker, .orb-facet { animation: none; }
 }
+
+/* Store row: floating orbs on a single drifting line */
+.orb-row { scrollbar-width: none; }
+.orb-row::-webkit-scrollbar { display: none; }
+.orb-float { animation: orb-row-float 9s ease-in-out infinite; }
+.orb-float:nth-child(2n) { animation-duration: 11s; animation-delay: -2s; }
+.orb-float:nth-child(3n) { animation-duration: 13s; animation-delay: -4s; }
+@keyframes orb-row-float {
+  0%, 100% { transform: translateY(-6px); }
+  50% { transform: translateY(8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orb-float { animation: none; }
+}
