@@ -5,8 +5,10 @@ import * as THREE from "three";
 import { buildNetwork } from "@/lib/neural/network";
 import { NeuralEngine } from "@/lib/neural/neuralEngine";
 import type { QualityProfile } from "@/lib/neural/types";
-import { PALETTE_FLAT } from "./palette";
+import { PALETTE, PALETTE_FLAT } from "./palette";
 import {
+  ATMO_FRAG,
+  ATMO_VERT,
   DUST_FRAG,
   DUST_VERT,
   EDGE_FRAG,
@@ -16,6 +18,7 @@ import {
   PULSE_FRAG,
   PULSE_VERT,
 } from "./shaders";
+
 
 /** Cluster -> palette index: cold hues dominate, amber only once. */
 const TONE_BY_CLUSTER = [0, 1, 2, 4, 1, 0, 2, 4, 1, 2, 0, 4, 1, 5];
