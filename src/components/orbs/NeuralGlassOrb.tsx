@@ -591,7 +591,8 @@ export function NeuralGlassOrb({
 
     if (group.current) {
       group.current.rotation.y += dt * (variant.spin + p.rotationSpeed * 0.5);
-      group.current.rotation.x = Math.sin(t * 0.14) * 0.06;
+      group.current.rotation.x = (variant.tilt ?? 0) + Math.sin(t * 0.14) * 0.06;
+      group.current.rotation.z = (variant.tilt ?? 0) * 0.35;
     }
   });
 

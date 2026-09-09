@@ -15,6 +15,7 @@ const VARIANT: OrbVariant = {
   satellites: 7,
   coreSize: 0.16,
   bolts: 10,
+  tilt: 0.5,
 };
 
 export function GalaxyOrb(props: OrbViewProps) {
