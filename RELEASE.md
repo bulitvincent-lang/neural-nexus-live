@@ -8,8 +8,8 @@ that hosts the files, the version number, and the `releaseReady` switch.
 `src/config/site.ts`:
 
 ```ts
-releaseBase: "https://github.com/<owner>/<repo>/releases/latest/download",
-releasesPage: "https://github.com/<owner>/<repo>/releases/latest",
+releaseBase: "https://github.com/bulitvincent-lang/neuralorb/releases/latest/download",
+releasesPage: "https://github.com/bulitvincent-lang/neuralorb/releases/latest",
 version: "0.1.0",     // must match src-tauri/tauri.conf.json + Cargo.toml
 releaseReady: false,  // flip to true once step 3 succeeded
 ```
