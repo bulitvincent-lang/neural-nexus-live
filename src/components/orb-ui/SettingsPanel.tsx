@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 
 import { SITE, connectorDownloadUrl } from "@/config/site";
-import { useOrbLibrary } from "@/hooks/useOrbLibrary";
+import { useOrbAccount } from "@/hooks/useOrbAccount";
 import type { OrbSettings } from "@/hooks/useOrbSettings";
 import { useI18n } from "@/lib/i18n";
 import { AI_OPTIONS, connectorManager, type AiId } from "@/lib/neural/connectors";
 import { ORBS } from "@/lib/orbs/catalog";
-import { orbState } from "@/lib/orbs/library";
 
 /**
  * Everyday settings, consumer only: my AIs, appearance, application.
