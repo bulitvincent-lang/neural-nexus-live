@@ -44,7 +44,7 @@ void main() {
   float idle = 0.22 + vPulse * 0.13;
   float intensity = idle + uActivity * 0.55 + vGlow * 2.4;
   float alpha = 0.20 + uActivity * 0.22 + vGlow * 0.62;
-  gl_FragColor = vec4(uColor * (0.75 + intensity * 1.5), clamp(alpha, 0.0, 1.0));
+  gl_FragColor = vec4(uColor * (0.30 + intensity * 0.45), clamp(alpha, 0.0, 0.42));
 }
 `;
 
@@ -77,8 +77,8 @@ void main() {
   if (d > 0.5) discard;
   float core = smoothstep(0.24, 0.0, d);
   float halo = smoothstep(0.5, 0.05, d);
-  vec3 color = mix(uPrimary, uSecondary, core) * (1.0 + vStrength * 1.6);
-  gl_FragColor = vec4(color, halo * min(1.0, 0.35 + vStrength * 0.8));
+  vec3 color = mix(uPrimary, uSecondary, core) * (0.35 + vStrength * 0.5);
+  gl_FragColor = vec4(color, halo * min(0.7, 0.18 + vStrength * 0.35));
 }
 `;
 
@@ -105,7 +105,7 @@ void main() {
   float halo = pow(smoothstep(0.5, 0.0, d), 1.7);
   vec3 col = mix(uAccent, uHot, core);
   col = mix(col, vec3(1.0), 0.30);
-  gl_FragColor = vec4(col * (1.5 + vB * 2.0), clamp(core + halo * 0.5, 0.0, 1.0));
+  gl_FragColor = vec4(col * (0.7 + vB * 0.6), clamp(core * 0.8 + halo * 0.25, 0.0, 0.85));
 }
 `;
 
