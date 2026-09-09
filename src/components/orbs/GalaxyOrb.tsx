@@ -140,7 +140,7 @@ export function GalaxyOrb({ engineRef, detail = 1 }: OrbViewProps) {
     uniforms.uConverge.value = p.convergenceLevel;
     uniforms.uSize.value = 1.25 + p.glowIntensity * 0.6;
     if (coreMat.current) {
-      coreMat.current.opacity = 0.07 + p.activityLevel * 0.18 + p.waveStrength * 0.12;
+      coreMat.current.opacity = 0.05 + p.activityLevel * 0.1 + p.waveStrength * 0.07;
     }
 
     if (group.current) {
