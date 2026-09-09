@@ -70,18 +70,18 @@ varying vec3 vN;
 varying vec3 vV;
 void main() {
   float fres = pow(1.0 - clamp(dot(normalize(vN), normalize(vV)), 0.0, 1.0), 2.6);
-  vec3 col = mix(vec3(0.30, 0.90, 0.72), vec3(0.62, 0.48, 1.0), 0.4 + 0.4 * uActivity);
+  vec3 col = mix(vec3(0.035, 0.85, 1.0), vec3(1.0, 0.31, 0.85), 0.4 + 0.4 * uActivity);
   gl_FragColor = vec4(col, fres * (0.08 + 0.16 * uActivity));
 }
 `;
 
 const VEILS = [
-  { radius: 0.62, arc: 4.2, tilt: 0.18, phase: 0.0, a: "#7cffc4", b: "#3f7bff" },
-  { radius: 0.78, arc: 3.4, tilt: -0.24, phase: 1.7, a: "#8f6bff", b: "#4ce3ff" },
-  { radius: 0.92, arc: 5.0, tilt: 0.32, phase: 3.1, a: "#5cf0d8", b: "#8f6bff" },
-  { radius: 1.02, arc: 2.8, tilt: -0.12, phase: 4.6, a: "#b7a8ff", b: "#59ffd0" },
-  { radius: 0.7, arc: 5.6, tilt: 0.42, phase: 5.9, a: "#4ce3ff", b: "#a0ffe0" },
-  { radius: 0.86, arc: 3.9, tilt: -0.36, phase: 2.4, a: "#9be9ff", b: "#6d5cff" },
+  { radius: 0.62, arc: 4.2, tilt: 0.18, phase: 0.0, a: "#09d8ff", b: "#6b62ff" },
+  { radius: 0.78, arc: 3.4, tilt: -0.24, phase: 1.7, a: "#6b62ff", b: "#ff4fd8" },
+  { radius: 0.92, arc: 5.0, tilt: 0.32, phase: 3.1, a: "#09d8ff", b: "#ffae55" },
+  { radius: 1.02, arc: 2.8, tilt: -0.12, phase: 4.6, a: "#dffbff", b: "#ff4fd8" },
+  { radius: 0.7, arc: 5.6, tilt: 0.42, phase: 5.9, a: "#ff4fd8", b: "#09d8ff" },
+  { radius: 0.86, arc: 3.9, tilt: -0.36, phase: 2.4, a: "#ffae55", b: "#6b62ff" },
 ] as const;
 
 export function AuroraOrb({ engineRef, detail = 1 }: OrbViewProps) {

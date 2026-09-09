@@ -41,7 +41,7 @@ export function OrbCard({
         <OrbThumb orb={orb} className="h-full w-full" />
         {live ? (
           <div className="absolute inset-0 animate-fade-in">
-            <OrbStage orbId={orb.id} mode="preview" detail={0.6} interactive={false} />
+            <OrbStage orbId={orb.id} mode="preview" detail={0.86} interactive={false} />
           </div>
         ) : null}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_-10%,transparent_40%,rgba(6,10,20,0.55)_100%)]" />
