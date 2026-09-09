@@ -29,7 +29,14 @@ function autoQuality(): QualityLevel {
   return "BALANCED";
 }
 
-export function NeuralCanvas() {
+export function NeuralCanvas({
+  managed = false,
+  powerSaving = false,
+}: {
+  /** true when the ConnectorManager already runs the activity layer */
+  managed?: boolean;
+  powerSaving?: boolean;
+} = {}) {
   const engineRef = useRef<NeuralEngine | null>(null);
   const [visible, setVisible] = useState(true);
   const [level, setLevel] = useState<QualityLevel>("BALANCED");
@@ -37,15 +44,20 @@ export function NeuralCanvas() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const forced = params.get("quality")?.toUpperCase() as QualityLevel | undefined;
-    setLevel(forced && forced in QUALITY_PROFILES ? forced : autoQuality());
+    setLevel(
+      powerSaving ? "LOW_POWER" : forced && forced in QUALITY_PROFILES ? forced : autoQuality(),
+    );
 
     const onVis = () => setVisible(!document.hidden);
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
-  }, []);
+  }, [powerSaving]);
 
   // Providers -> Local Activity Bridge -> Event Bus. No host is hardcoded.
-  useEffect(() => startDefaultProviders(), []);
+  useEffect(() => {
+    if (managed) return;
+    return startDefaultProviders();
+  }, [managed]);
 
 
 
