@@ -6,9 +6,9 @@ import { ORBS } from "@/lib/orbs/catalog";
 import type { Orb, OrbId } from "@/lib/orbs/types";
 
 /**
- * One single line of floating orbs that drifts on its own. Every orb is the
- * real animated 3D object — no thumbnails, no preview button. Hovering an orb
- * makes it grow and come alive; clicking it opens it full size.
+ * A clean table-like grid of orbs: 2 on very small screens, 3 on tablets,
+ * 4 on desktop. Every orb is the real animated 3D object. Hovering wakes it
+ * up and scales it; clicking opens it full size.
  */
 export function OrbRow({
   ownedIds,
@@ -23,15 +23,12 @@ export function OrbRow({
   onUse: (orb: Orb) => void;
   onBuy: (orb: Orb) => void;
 }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [paused, setPaused] = useState(false);
   const [enlarged, setEnlarged] = useState<Orb | null>(null);
   const [hovered, setHovered] = useState<OrbId | null>(null);
-  const [visible, setVisible] = useState<Set<OrbId>>(new Set(["neural", "galaxy", "liquid"]));
+  const [visible, setVisible] = useState<Set<OrbId>>(new Set());
   const [bigSize, setBigSize] = useState(0);
 
-  // the enlarged orb gets a fixed pixel square, measured before it mounts, so
-  // the 3D view is never sized from a still-growing box
+  // the enlarged orb gets a fixed pixel square, measured before it mounts
   useEffect(() => {
     if (!enlarged) {
       setBigSize(0);
@@ -44,41 +41,6 @@ export function OrbRow({
     return () => window.removeEventListener("resize", measure);
   }, [enlarged]);
 
-  // gentle drift, ping-ponging at both ends. Manual scroll always wins.
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    let dir = 1;
-    let raf = 0;
-    let last = performance.now();
-    let pos = track.scrollLeft;
-    const step = (now: number) => {
-      const dt = Math.min(now - last, 40);
-      last = now;
-      if (!paused && !enlarged) {
-        const max = track.scrollWidth - track.clientWidth;
-        if (max > 4) {
-          // resync if the user scrolled by hand
-          if (Math.abs(track.scrollLeft - pos) > 2) pos = track.scrollLeft;
-          pos += dir * dt * 0.055;
-          if (pos >= max) {
-            pos = max;
-            dir = -1;
-          } else if (pos <= 0) {
-            pos = 0;
-            dir = 1;
-          }
-          track.scrollLeft = pos;
-        }
-      } else {
-        pos = track.scrollLeft;
-      }
-      raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [paused, enlarged]);
-
   const register = useCallback((id: OrbId, el: HTMLElement | null) => {
     if (!el) return;
     const observer = new IntersectionObserver(
@@ -89,7 +51,7 @@ export function OrbRow({
           else next.delete(id);
           return next;
         }),
-      { root: trackRef.current, rootMargin: "300px" },
+      { root: null, rootMargin: "100px" },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -113,18 +75,9 @@ export function OrbRow({
 
   return (
     <>
-      <div
-        ref={trackRef}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => {
-          setPaused(false);
-          setHovered(null);
-        }}
-        onTouchStart={() => setPaused(true)}
-        className="orb-row flex gap-8 overflow-x-auto px-10 pb-10 pt-8"
-      >
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-4 gap-y-8 px-6 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4">
         {items.map(({ orb, owned }) => (
-          <OrbRowItem
+          <OrbGridItem
             key={orb.id}
             orb={orb}
             owned={owned}
@@ -208,7 +161,7 @@ export function OrbRow({
   );
 }
 
-function OrbRowItem({
+function OrbGridItem({
   orb,
   owned,
   active,
@@ -237,7 +190,7 @@ function OrbRowItem({
   useEffect(() => register(orb.id, ref.current), [orb.id, register]);
 
   return (
-    <div ref={ref} className="orb-float w-[248px] shrink-0 sm:w-[268px]">
+    <div ref={ref} className="orb-float flex flex-col items-center">
       <button
         type="button"
         onClick={onOpen}
@@ -246,8 +199,8 @@ function OrbRowItem({
         onFocus={() => onHover(true)}
         onBlur={() => onHover(false)}
         aria-label={`Enlarge ${orb.name}`}
-        className={`relative block h-[248px] w-full cursor-zoom-in rounded-full outline-none transition-transform duration-500 ease-out sm:h-[268px] ${
-          hot ? "scale-[1.16]" : "scale-100"
+        className={`relative block aspect-square w-full max-w-[220px] cursor-zoom-in rounded-full outline-none transition-transform duration-500 ease-out sm:max-w-[248px] lg:max-w-[260px] ${
+          hot ? "scale-[1.10]" : "scale-100"
         }`}
       >
         <span
@@ -262,7 +215,7 @@ function OrbRowItem({
           <OrbStage
             orbId={orb.id}
             mode="preview"
-            detail={0.6}
+            detail={0.55}
             interactive={false}
             energy={hot ? 1 : 0}
             bloom={hot ? 0.34 : 0.12}
@@ -275,7 +228,7 @@ function OrbRowItem({
         ) : null}
       </button>
 
-      <div className="mt-1 text-center">
+      <div className="mt-3 text-center">
         <p className="text-[13px] tracking-wide text-[#eaf2ff]">{orb.name}</p>
         {orb.included || owned ? (
           <p className="mt-1 text-[11px] text-[#93aac8]">{orb.included ? "Included" : "Owned"}</p>

@@ -47,7 +47,7 @@ export const ORBS: Orb[] = [
     summary: "A crystalline structure of facets, polyhedra and inner shards.",
     behaviour: "Facets light up and geometry propagates through the shell.",
     included: false,
-    thumb: ["#d9f2ff", "#7f8dff"],
+    thumb: ["#d46cff", "#fff6a3"],
   },
   {
     id: "plasma",
