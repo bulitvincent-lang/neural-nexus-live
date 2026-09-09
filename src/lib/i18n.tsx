@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 
 /** Four markets only: English (default), French, Spanish, German. */
 export const LANGS = [
