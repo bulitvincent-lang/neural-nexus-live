@@ -54,8 +54,7 @@ export interface NeuralParams {
   disturbance: number;
 }
 
-export type QualityLevel = "ULTRA" | "HIGH" | BALANCED_T | "LOW_POWER";
-type BALANCED_T = "BALANCED";
+export type QualityLevel = "ULTRA" | "HIGH" | "BALANCED" | "LOW_POWER";
 
 export interface QualityProfile {
   level: QualityLevel;
