@@ -113,7 +113,9 @@ function buildDendrites(trunks: number, maxDepth: number) {
 
 
   segs.forEach((s, i) => {
-    s.order = i / Math.max(1, segs.length - 1);
+    // radial birth order: the arbor grows outward symmetrically, not trunk by trunk
+    s.order = s.depth / Math.max(1, maxDepth);
+    void i;
   });
   return segs;
 }
