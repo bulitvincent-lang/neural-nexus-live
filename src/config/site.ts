@@ -8,8 +8,8 @@ export const SITE = {
   url: "https://neuralorb.app",
   tagline: "See your AI live and work.",
   /** GitHub releases (or any static host) that serves the packaged installers. */
-  releaseBase: "https://github.com/neural-orb/neural-orb/releases/latest/download",
-  releasesPage: "https://github.com/neural-orb/neural-orb/releases/latest",
+  releaseBase: "https://github.com/bulitvincent-lang/neural-orb/releases/latest/download",
+  releasesPage: "https://github.com/bulitvincent-lang/neural-orb/releases/latest",
   version: "0.1.0",
   /**
    * Passe à true une fois que les installateurs sont publiés sur releaseBase.
