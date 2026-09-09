@@ -35,9 +35,10 @@ void main() {
   vI = mix(twinkle * (0.42 + 0.75 * uActivity), 1.0, core) * (1.0 - dust * 0.78);
   vArm = aArm;
   vType = aType;
-  float base = uSize * (core > 0.5 ? 2.1 : dust > 0.5 ? 1.5 : 1.0);
-  gl_PointSize = base * (0.85 + 0.5 * uActivity) * (240.0 / -mv.z);
+  float base = uSize * (core > 0.5 ? 1.5 : dust > 0.5 ? 1.2 : 0.85);
+  gl_PointSize = base * (0.85 + 0.4 * uActivity) * (95.0 / -mv.z);
 }
+
 `;
 
 const FRAG = /* glsl */ `
@@ -56,7 +57,7 @@ void main() {
   vec3 col = mix(cold, violet, fract(vArm * 0.37));
   if (vType > 0.5 && vType < 1.5) col = mix(warm, vec3(1.0), 0.45);
   if (vType > 1.5) col = mix(violet, cold, 0.5) * 0.7;
-  gl_FragColor = vec4(col * (0.55 + vI * 1.5), a * vI);
+  gl_FragColor = vec4(col * (0.55 + vI * 0.6), a * vI * 0.22);
 }
 `;
 
@@ -67,9 +68,10 @@ export function GalaxyOrb({ engineRef, detail = 1 }: OrbViewProps) {
 
   const data = useMemo(() => {
     const arms = 3;
-    const stars = Math.round(9000 * detail);
-    const coreCount = Math.round(1200 * detail);
-    const dust = Math.round(3000 * detail);
+    const stars = Math.round(5200 * detail);
+    const coreCount = Math.round(800 * detail);
+    const dust = Math.round(1600 * detail);
+
     const total = stars + coreCount + dust;
     const pos = new Float32Array(total * 3);
     const seed = new Float32Array(total);
@@ -136,10 +138,11 @@ export function GalaxyOrb({ engineRef, detail = 1 }: OrbViewProps) {
     uniforms.uTime.value = clock.current;
     uniforms.uActivity.value = p.activityLevel;
     uniforms.uConverge.value = p.convergenceLevel;
-    uniforms.uSize.value = 1.55 + p.glowIntensity * 0.9;
+    uniforms.uSize.value = 1.25 + p.glowIntensity * 0.6;
     if (coreMat.current) {
-      coreMat.current.opacity = 0.14 + p.activityLevel * 0.4 + p.waveStrength * 0.25;
+      coreMat.current.opacity = 0.07 + p.activityLevel * 0.18 + p.waveStrength * 0.12;
     }
+
     if (group.current) {
       group.current.rotation.y += dt * (0.05 + p.rotationSpeed * 0.6);
       group.current.rotation.x = -0.42 + Math.sin(clock.current * 0.09) * 0.09;

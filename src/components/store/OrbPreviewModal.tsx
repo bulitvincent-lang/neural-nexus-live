@@ -52,7 +52,7 @@ export function OrbPreviewModal({ orb, onClose }: { orb: Orb; onClose: () => voi
             </button>
           </div>
         ) : (
-          <OrbStage key={`${orb.id}-${run}`} orbId={orb.id} mode="preview" detail={1} />
+          <OrbStage key={`${orb.id}-${run}`} orbId={orb.id} mode="preview" />
         )}
       </div>
 

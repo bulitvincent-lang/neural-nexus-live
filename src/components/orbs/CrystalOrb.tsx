@@ -58,9 +58,9 @@ void main() {
   vec3 col = mix(violet, ice, facet);
   // faked internal refraction: colour splits with the viewing angle
   col += vec3(0.10, 0.03, 0.16) * fres * 2.0;
-  col *= 0.30 + vLit;
+  col *= 0.34 + vLit * 0.8;
   float a = 0.16 + facet * 0.30 + fres * 0.45 + vLit * 0.30;
-  gl_FragColor = vec4(col * (0.8 + uGlow * 0.6), clamp(a, 0.0, 0.92));
+  gl_FragColor = vec4(col * (0.6 + uGlow * 0.4), clamp(a * 0.85, 0.0, 0.9));
 }
 `;
 
@@ -89,7 +89,7 @@ export function CrystalOrb({ engineRef, detail = 1 }: OrbViewProps) {
       const y = 1 - 2 * t;
       const r = Math.sqrt(Math.max(0, 1 - y * y));
       const phi = i * 2.399963;
-      const rad = inner ? 0.28 + Math.random() * 0.3 : 0.72 + Math.random() * 0.34;
+      const rad = inner ? 0.3 + Math.random() * 0.22 : 0.68 + Math.random() * 0.22;
       v.set(Math.cos(phi) * r, y, Math.sin(phi) * r).multiplyScalar(rad);
       e.set(Math.random() * 6.28, Math.random() * 6.28, Math.random() * 6.28);
       q.setFromEuler(e);
@@ -146,6 +146,18 @@ export function CrystalOrb({ engineRef, detail = 1 }: OrbViewProps) {
 
   return (
     <group ref={group}>
+      {/* translucent inner body: keeps the shards reading as one crystal */}
+      <mesh scale={0.62}>
+        <icosahedronGeometry args={[1, 1]} />
+        <meshBasicMaterial
+          color="#6f6bff"
+          transparent
+          opacity={0.16}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+
       <instancedMesh ref={mesh} args={[undefined, undefined, count]} frustumCulled={false}>
         <octahedronGeometry args={[1, 0]} />
         <shaderMaterial

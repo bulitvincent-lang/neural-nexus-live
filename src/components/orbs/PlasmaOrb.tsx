@@ -51,7 +51,7 @@ void main() {
   vec3 white = vec3(1.0);
   vec3 col = mix(cold, hot, fract(vFil * 0.271));
   col = mix(col, white, smoothstep(0.35, 0.5, abs(vT - 0.5)) * 0.35);
-  gl_FragColor = vec4(col * (0.6 + vA * 1.6), clamp(vA, 0.0, 0.9));
+  gl_FragColor = vec4(col * (0.6 + vA * 0.8), clamp(vA * 0.8, 0.0, 0.85));
 }
 `;
 
@@ -78,7 +78,7 @@ varying vec3 vV;
 void main() {
   float fres = pow(1.0 - clamp(dot(normalize(vN), normalize(vV)), 0.0, 1.0), 3.2);
   vec3 col = mix(vec3(0.28, 0.55, 1.0), vec3(1.0, 0.6, 0.95), uActivity);
-  gl_FragColor = vec4(col * (0.5 + uGlow), fres * (0.10 + 0.35 * uActivity));
+  gl_FragColor = vec4(col * (0.45 + uGlow * 0.4), fres * (0.08 + 0.24 * uActivity));
 }
 `;
 
@@ -93,7 +93,7 @@ void main() {
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
   vI = 0.3 + 0.9 * uActivity;
-  gl_PointSize = uSize * (200.0 / -mv.z);
+  gl_PointSize = uSize * (65.0 / -mv.z);
 }
 `;
 
@@ -104,7 +104,7 @@ void main() {
   float d = length(uv);
   if (d > 0.5) discard;
   float a = smoothstep(0.5, 0.0, d);
-  gl_FragColor = vec4(mix(vec3(0.6, 0.9, 1.0), vec3(1.0, 0.85, 1.0), vI) * (0.7 + vI), a * a * vI);
+  gl_FragColor = vec4(mix(vec3(0.6, 0.9, 1.0), vec3(1.0, 0.85, 1.0), vI) * (0.6 + vI * 0.4), a * a * vI * 0.4);
 }
 `;
 
