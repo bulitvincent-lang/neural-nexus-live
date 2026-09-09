@@ -39,7 +39,7 @@ export interface OrbStageProps {
 export function OrbStage({
   orbId,
   mode = "live",
-  detail = 1,
+  detail,
   managed = false,
   interactive = true,
   bloom = 0.95,
@@ -47,6 +47,8 @@ export function OrbStage({
   const engineRef = useRef<NeuralEngine | null>(null);
   const [visible, setVisible] = useState(true);
   const Orb = RENDERERS[orbId];
+  // previews run in a browser tab next to the whole store: keep them light
+  const quality = detail ?? (mode === "preview" ? 0.5 : 1);
 
   useEffect(() => {
     const onVis = () => setVisible(!document.hidden);
@@ -77,15 +79,17 @@ export function OrbStage({
 
   return (
     <Canvas
-      dpr={detail < 0.7 ? [1, 1.25] : [1, 2]}
+      dpr={quality < 0.7 ? [1, 1.25] : [1, 2]}
       frameloop={visible ? "always" : "never"}
       camera={camera}
-      gl={{ antialias: detail > 0.7, alpha: true, powerPreference: "high-performance" }}
+      performance={{ min: 0.45 }}
+      gl={{ antialias: quality > 0.7, alpha: true, powerPreference: "high-performance" }}
       style={{ background: "transparent" }}
     >
       <Suspense fallback={null}>
-        <Orb engineRef={engineRef} detail={detail} />
+        <Orb engineRef={engineRef} detail={quality} />
       </Suspense>
+      <AdaptiveDpr pixelated={false} />
       {interactive ? (
         <OrbitControls
           enablePan={false}
@@ -106,9 +110,10 @@ export function OrbStage({
           radius={0.74}
         />
         <ToneMapping />
-        <Noise opacity={0.014} premultiply />
+        {quality > 0.7 ? <Noise opacity={0.014} premultiply /> : <></>}
         <Vignette offset={0.3} darkness={0.65} />
       </EffectComposer>
     </Canvas>
   );
 }
+
