@@ -125,7 +125,7 @@ export function SynapseOrb({ engineRef, detail = 1 }: OrbViewProps) {
   const growth = useRef(0.35);
 
   const data = useMemo(() => {
-    const segs = buildDendrites(detail < 0.7 ? 9 : 14, detail < 0.7 ? 4 : 5);
+    const segs = buildDendrites(detail < 0.7 ? 12 : 18, detail < 0.7 ? 5 : 6);
     const E = segs.length;
     const pos = new Float32Array(E * 6);
     const grow = new Float32Array(E * 2);
@@ -242,8 +242,14 @@ export function SynapseOrb({ engineRef, detail = 1 }: OrbViewProps) {
     <group ref={group} scale={0.78}>
       {/* soma: the structure has a living centre */}
       <mesh>
-        <sphereGeometry args={[0.075, 32, 32]} />
-        <meshBasicMaterial color="#c9ffe6" transparent opacity={0.35} />
+        <sphereGeometry args={[0.06, 24, 24]} />
+        <meshBasicMaterial
+          color="#dbfff0"
+          transparent
+          opacity={0.5}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
       </mesh>
       <mesh>
         <sphereGeometry args={[0.16, 24, 24]} />
