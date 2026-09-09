@@ -430,7 +430,17 @@ export function NeuralGlassOrb({
       let w = 0;
       for (let b = 0; b < boltCount; b++) {
         const a = pts[Math.floor(br() * pts.length)]!;
-        const z = pts[Math.floor(br() * pts.length)]!;
+        // hop to a *nearby* node so the arc stays a short local crackle
+        let z = a;
+        let bestD = Infinity;
+        for (let tryI = 0; tryI < 24; tryI++) {
+          const cand = pts[Math.floor(br() * pts.length)]!;
+          const d = cand.distanceToSquared(a);
+          if (d > 0.004 && d < bestD) {
+            bestD = d;
+            z = cand;
+          }
+        }
         const seed = br();
         const off = new THREE.Vector3(br() - 0.5, br() - 0.5, br() - 0.5).normalize();
         const path: THREE.Vector3[] = [];
