@@ -10,7 +10,7 @@ import type { ActivityLevel, ConnectorId } from "./types";
 export class DeepConnector extends BaseConnector {
   readonly id: ConnectorId = "deep";
   readonly level: ActivityLevel = 2;
-  protected readonly sources = ["mcp", "deep", "tool", ""];
+  protected readonly sources = ["mcp", "deep", "tool"];
 
   protected createProvider(): ActivityProvider {
     return new MCPActivityProvider();
