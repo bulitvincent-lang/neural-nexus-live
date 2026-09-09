@@ -82,30 +82,35 @@ function buildDendrites(trunks: number, maxDepth: number) {
 
   const grow = (from: THREE.Vector3, dir: THREE.Vector3, depth: number, parent: number) => {
     if (depth > maxDepth) return;
-    const len = (0.42 - depth * 0.055) * (0.75 + Math.random() * 0.5);
+    // short segments that shorten with depth: the classic dendritic taper
+    const len = 0.3 * Math.pow(0.76, depth) * (0.8 + Math.random() * 0.45);
     const to = from.clone().addScaledVector(dir, len);
-    // keep the whole structure inside a sphere
-    if (to.length() > 1.15) to.setLength(1.05 + Math.random() * 0.08);
+    if (to.length() > 1.0) to.setLength(0.94 + Math.random() * 0.06);
     const idx = push(from.clone(), to, depth, parent);
-    const branches = depth < 2 ? 3 : Math.random() < 0.72 ? 2 : 1;
+    const branches = depth === 0 ? 2 : Math.random() < 0.7 ? 2 : 3;
     for (let i = 0; i < branches; i++) {
-      const jitter = new THREE.Vector3(
-        Math.random() - 0.5,
-        Math.random() - 0.5,
-        Math.random() - 0.5,
-      ).multiplyScalar(0.55);
-      const next = dir.clone().add(jitter).normalize();
+      // wide, evenly spread bifurcation angles instead of a straight tuft
+      const axis = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+        .cross(dir)
+        .normalize();
+      const angle = 0.45 + Math.random() * 0.45;
+      const next = dir
+        .clone()
+        .applyAxisAngle(axis, i % 2 === 0 ? angle : -angle)
+        .normalize();
       grow(to, next, depth + 1, idx);
     }
   };
 
   for (let i = 0; i < trunks; i++) {
-    const u = Math.random() * 2 - 1;
-    const th = (i / trunks) * Math.PI * 2 + Math.random() * 0.5;
-    const r = Math.sqrt(1 - u * u);
-    const dir = new THREE.Vector3(Math.cos(th) * r, u, Math.sin(th) * r).normalize();
-    grow(new THREE.Vector3(0, 0, 0).addScaledVector(dir, 0.05), dir, 0, -1);
+    // fibonacci sphere: trunks leave the soma in every direction, evenly
+    const y = 1 - (2 * (i + 0.5)) / trunks;
+    const r = Math.sqrt(Math.max(0, 1 - y * y));
+    const th = i * 2.399963;
+    const dir = new THREE.Vector3(Math.cos(th) * r, y, Math.sin(th) * r).normalize();
+    grow(new THREE.Vector3().addScaledVector(dir, 0.07), dir, 0, -1);
   }
+
 
   segs.forEach((s, i) => {
     s.order = i / Math.max(1, segs.length - 1);
