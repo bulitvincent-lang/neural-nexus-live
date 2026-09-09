@@ -786,6 +786,25 @@ export function NeuralGlassOrb({
     [col],
   );
 
+  const sparkU = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uActivity: { value: 0 },
+      uBuild: { value: 0 },
+      uEnergy: { value: 0 },
+      uBreath: { value: variant.breath },
+      uSize: { value: 3.1 },
+      uCursor: { value: new THREE.Vector3(0, 0, 2) },
+      uCursorAmp: { value: 0 },
+      uWave: { value: 0 },
+      uHot: { value: col.hot },
+      uAccent: { value: col.accent },
+    }),
+    [col, variant.breath],
+  );
+
+
+
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
     clock.current += dt;
