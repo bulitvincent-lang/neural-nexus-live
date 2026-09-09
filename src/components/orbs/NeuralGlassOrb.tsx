@@ -831,7 +831,7 @@ export function NeuralGlassOrb({
       uBuild: { value: 0 },
       uEnergy: { value: 0 },
       uBreath: { value: variant.breath },
-      uSize: { value: 24.0 },
+      uSize: { value: 7.2 },
       uCursor: { value: new THREE.Vector3(0, 0, 2) },
       uCursorAmp: { value: 0 },
       uWave: { value: 0 },
