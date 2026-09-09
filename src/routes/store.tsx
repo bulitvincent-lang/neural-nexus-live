@@ -165,8 +165,8 @@ function StorePage() {
         </h1>
         <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#b3c6de]">
           Every orb reads the same activity from your AI and shows it in a completely different way.
-          Neural comes with your {formatPrice(SUBSCRIPTION_PRICE)} / year subscription. Any other orb
-          is {formatPrice(ORB_PRICE)}, once, yours for good.
+          Neural comes with your subscription. Every other orb is bought once and stays yours for
+          good — no extra subscription, no tiers.
         </p>
         {!account.signedIn && !account.loading ? (
           <p className="mt-4 max-w-xl text-[11px] leading-relaxed text-[#8ba4c4]">
@@ -189,7 +189,7 @@ function StorePage() {
 
       <section className="pb-24">
         <h2 className="mx-auto max-w-6xl px-6 text-[11px] uppercase tracking-[0.32em] text-[#8ba4c4]">
-          All orbs · click one to enlarge it
+          All orbs · hover to wake one up, click to see it big
         </h2>
         <div className="mt-6">
           <OrbRow
@@ -204,9 +204,9 @@ function StorePage() {
           />
         </div>
         <p className="mx-auto mt-10 max-w-xl px-6 text-[11px] leading-relaxed text-[#7f96b6]">
-          Orbs you buy stay in your account for good. If your {formatPrice(SUBSCRIPTION_PRICE)} /
-          year subscription lapses they stay yours and come back the moment it is active again. Your
-          first {TRIAL_DAYS} days are free.
+          Your orbs live on your account, so they follow you to any computer. If your subscription
+          lapses they stay yours and come back the moment it is active again. Your first {TRIAL_DAYS}{" "}
+          days are free.
         </p>
       </section>
 

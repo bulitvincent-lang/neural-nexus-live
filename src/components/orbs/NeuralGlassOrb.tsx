@@ -52,26 +52,32 @@ const NODE_VERT = /* glsl */ `
 attribute float aSeed;
 attribute float aTint;
 attribute float aScale;
+attribute float aOrder;
 uniform float uTime;
 uniform float uActivity;
 uniform float uNode;
 uniform float uBreath;
 uniform float uSize;
+uniform float uBuild;
 varying float vI;
 varying float vTint;
 
 void main() {
   vec3 dir = normalize(position + 1e-5);
   float r = length(position);
+  // the structure assembles from the core outwards as uBuild rises
+  float rev = smoothstep(aOrder - 0.42, aOrder + 0.05, uBuild);
   float wob = sin(uTime * (0.6 + aSeed * 0.9) + aSeed * 31.0);
-  vec3 p = dir * (r + wob * uBreath * (0.35 + uActivity * 0.9));
+  vec3 p = dir * (r * mix(0.9, 1.0, rev) + wob * uBreath * (0.35 + uActivity * 0.9) * rev);
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
 
   float fire = 0.5 + 0.5 * sin(uTime * (1.1 + aSeed * 3.4) + aSeed * 40.0);
-  vI = mix(0.30, 1.0, fire * (0.35 + uNode * 0.85));
+  // at rest the orb glows low; hovering makes every node blaze
+  vI = mix(0.30, 1.0, fire * (0.35 + uNode * 0.85)) * rev
+     * (0.62 + smoothstep(0.78, 1.0, uBuild) * 0.75);
   vTint = aTint;
-  gl_PointSize = uSize * aScale * (0.8 + 0.55 * uActivity) * (26.0 / -mv.z);
+  gl_PointSize = uSize * aScale * (0.8 + 0.55 * uActivity) * (26.0 / -mv.z) * rev;
 }
 `;
 
@@ -90,8 +96,8 @@ void main() {
   float halo = pow(smoothstep(0.5, 0.0, d), 2.4);
   vec3 col = mix(uDeep, uMain, smoothstep(0.0, 0.6, vTint));
   col = mix(col, uHot, smoothstep(0.62, 1.0, vTint) * vI);
-  float a = (halo * 0.085 + core * 0.42) * (0.25 + vI * 0.55);
-  gl_FragColor = vec4(col * (0.45 + vI * 0.7) + core * 0.18, a);
+  float a = (halo * 0.22 + core * 0.9) * (0.45 + vI * 0.55);
+  gl_FragColor = vec4(col * (0.9 + vI * 1.5) + core * 0.45, clamp(a * 1.5, 0.0, 1.0));
 }
 `;
 
@@ -99,26 +105,30 @@ const LINK_VERT = /* glsl */ `
 attribute float aSeed;
 attribute float aEnd;
 attribute float aTint;
+attribute float aOrder;
 uniform float uTime;
 uniform float uActivity;
 uniform float uDensity;
 uniform float uBreath;
+uniform float uBuild;
 varying float vI;
 varying float vTint;
 varying float vEnd;
 void main() {
   vec3 dir = normalize(position + 1e-5);
   float r = length(position);
+  float rev = smoothstep(aOrder - 0.42, aOrder + 0.05, uBuild);
   float wob = sin(uTime * (0.6 + aSeed * 0.9) + aSeed * 31.0);
-  vec3 p = dir * (r + wob * uBreath * (0.35 + uActivity * 0.9));
+  vec3 p = dir * (r * mix(0.9, 1.0, rev) + wob * uBreath * (0.35 + uActivity * 0.9) * rev);
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
 
   // travelling impulse along the link
   float phase = fract(uTime * (0.16 + uActivity * 0.6) + aSeed);
   float pulse = smoothstep(0.35, 0.0, abs(phase - aEnd));
-  float on = step(1.0 - uDensity * 0.95, aSeed);
-  vI = (0.16 + 0.5 * uActivity) * on + pulse * (0.35 + uActivity * 0.9);
+  float on = max(0.45, step(1.0 - uDensity * 0.95, aSeed));
+  vI = ((0.55 + 0.45 * uActivity) * on + pulse * (0.5 + uActivity * 0.9)) * rev
+     * (0.6 + smoothstep(0.78, 1.0, uBuild) * 0.85);
   vTint = aTint;
   vEnd = aEnd;
 }
@@ -131,7 +141,9 @@ varying float vI;
 varying float vTint;
 void main() {
   vec3 col = mix(uMain, uAccent, smoothstep(0.7, 1.0, vTint));
-  gl_FragColor = vec4(col * (0.45 + vI * 0.8), clamp(vI, 0.0, 1.0) * 0.32);
+  // additive: brightness comes from rgb * alpha, so keep both meaningful
+  col = mix(col, vec3(1.0), 0.18);
+  gl_FragColor = vec4(col * (0.9 + vI * 1.7), clamp(0.3 + vI * 0.9, 0.0, 1.0));
 }
 `;
 
@@ -188,6 +200,7 @@ attribute float aSeed;
 attribute float aAlong;
 uniform float uTime;
 uniform float uActivity;
+uniform float uBuild;
 varying float vI;
 void main() {
   vec3 p = position;
@@ -202,7 +215,8 @@ void main() {
   float phase = fract(uTime * (0.28 + uActivity * 0.9) + aSeed);
   float flash = pow(smoothstep(0.16, 0.0, phase), 1.5);
   float travel = smoothstep(0.28, 0.0, abs(phase * 3.4 - aAlong));
-  vI = flash * (0.55 + uActivity) + travel * 0.55 * (0.3 + uActivity);
+  vI = (flash * (0.55 + uActivity) + travel * 0.55 * (0.3 + uActivity))
+     * smoothstep(0.86, 1.0, uBuild);
 }
 `;
 
@@ -358,7 +372,9 @@ function mulberry(seed: number) {
 /** cheap k-nearest link web */
 function buildLinks(pts: THREE.Vector3[], degree: number) {
   const a: number[] = [];
-  const stride = Math.max(1, Math.floor(pts.length / 900));
+  // sample enough sources for a dense web while keeping the cost bounded
+  const stride = Math.max(1, Math.floor(pts.length / 1600));
+  const dists: number[] = [];
   for (let i = 0; i < pts.length; i += stride) {
     const best: { j: number; d: number }[] = [];
     for (let j = 0; j < pts.length; j += stride) {
@@ -371,8 +387,21 @@ function buildLinks(pts: THREE.Vector3[], degree: number) {
         if (d < best[worst]!.d) best[worst] = { j, d };
       }
     }
-    // long links look like random polygons; keep the web local
-    for (const b of best) if (b.j > i && b.d < 0.16) a.push(i, b.j);
+    for (const b of best) {
+      if (b.j <= i) continue;
+      a.push(i, b.j);
+      dists.push(b.d);
+    }
+  }
+  // drop the longest 12% so the web stays local instead of drawing random polygons
+  if (dists.length > 20) {
+    const sorted = [...dists].sort((x, y) => x - y);
+    const cut = sorted[Math.floor(sorted.length * 0.88)]!;
+    const filtered: number[] = [];
+    for (let k = 0; k < dists.length; k++) {
+      if (dists[k]! <= cut) filtered.push(a[k * 2]!, a[k * 2 + 1]!);
+    }
+    return filtered;
   }
   return a;
 }
@@ -381,10 +410,13 @@ export function NeuralGlassOrb({
   variant,
   engineRef,
   detail = 1,
+  energy = 0,
 }: OrbViewProps & { variant: OrbVariant }) {
   const engine = useOrbEngine(engineRef, 12);
   const group = useRef<THREE.Group>(null);
   const clock = useRef(0);
+  const build = useRef(0);
+  const extras = useRef<THREE.Group>(null);
 
   const geo = useMemo(() => {
     const count = Math.max(320, Math.round(variant.nodes * (0.5 + detail * 0.5)));
@@ -393,6 +425,7 @@ export function NeuralGlassOrb({
     const nodeSeed = new Float32Array(count);
     const nodeTint = new Float32Array(count);
     const nodeScale = new Float32Array(count);
+    const nodeOrder = new Float32Array(count);
     const rnd = mulberry(count + 11);
     pts.forEach((p, i) => {
       nodePos[i * 3] = p.x;
@@ -401,6 +434,8 @@ export function NeuralGlassOrb({
       nodeSeed[i] = rnd();
       nodeTint[i] = tint[i]!;
       nodeScale[i] = scale[i]!;
+      // build order: core first, outer shell last, with a little scatter
+      nodeOrder[i] = Math.min(1, p.length() * 0.62 + rnd() * 0.38);
     });
 
     const pairs = buildLinks(pts, Math.max(2, Math.round(variant.degree * (0.6 + detail * 0.4))));
@@ -408,6 +443,7 @@ export function NeuralGlassOrb({
     const ls = new Float32Array(pairs.length);
     const le = new Float32Array(pairs.length);
     const lt = new Float32Array(pairs.length);
+    const lo = new Float32Array(pairs.length);
     for (let k = 0; k < pairs.length; k++) {
       const p = pts[pairs[k]!]!;
       lp[k * 3] = p.x;
@@ -417,6 +453,8 @@ export function NeuralGlassOrb({
       ls[k] = ((seg * 9301 + 49297) % 233280) / 233280;
       le[k] = k % 2;
       lt[k] = ls[k]! > 0.86 ? 1 : nodeTint[pairs[k]!]! * 0.8;
+      // a link only shows once both of its nodes exist
+      lo[k] = Math.min(1, Math.max(nodeOrder[pairs[k]!]!, nodeOrder[pairs[k + (k % 2 ? -1 : 1)]!]!) + 0.05);
     }
     // electric arcs: jagged polylines hopping between distant nodes
     const boltCount = variant.bolts ?? 0;
@@ -473,7 +511,7 @@ export function NeuralGlassOrb({
       }
     }
 
-    return { count, nodePos, nodeSeed, nodeTint, nodeScale, lp, ls, le, lt, bp, bs, ba };
+    return { count, nodePos, nodeSeed, nodeTint, nodeScale, nodeOrder, lp, ls, le, lt, lo, bp, bs, ba };
   }, [variant, detail]);
 
   const rays = useMemo(() => {
@@ -484,7 +522,7 @@ export function NeuralGlassOrb({
     for (let i = 0; i < n; i++) {
       const d = fib(i, n);
       const inner = 0.86 + rnd() * 0.1;
-      const outer = inner + 0.1 + rnd() * 0.3;
+      const outer = inner + 0.05 + rnd() * 0.11;
       pos.set([d.x * inner, d.y * inner, d.z * inner, d.x * outer, d.y * outer, d.z * outer], i * 6);
     }
     return pos;
@@ -521,7 +559,8 @@ export function NeuralGlassOrb({
       uActivity: { value: 0 },
       uNode: { value: 0 },
       uBreath: { value: variant.breath },
-      uSize: { value: 1.25 },
+      uSize: { value: 2.15 },
+      uBuild: { value: 0 },
       uDeep: { value: col.deep },
       uMain: { value: col.main },
       uHot: { value: col.hot },
@@ -534,6 +573,7 @@ export function NeuralGlassOrb({
       uTime: { value: 0 },
       uActivity: { value: 0 },
       uDensity: { value: 0.3 },
+      uBuild: { value: 0 },
       uBreath: { value: variant.breath },
       uMain: { value: col.main },
       uAccent: { value: col.accent },
@@ -566,6 +606,7 @@ export function NeuralGlassOrb({
     () => ({
       uTime: { value: 0 },
       uActivity: { value: 0 },
+      uBuild: { value: 0 },
       uHot: { value: col.hot },
       uAccent: { value: col.accent },
     }),
@@ -579,6 +620,14 @@ export function NeuralGlassOrb({
     const p = engine.params;
     const t = clock.current;
 
+    // hovering ignites the orb: it assembles, brightens and starts arcing
+    const target = 0.8 + Math.min(1, Math.max(0, energy)) * 0.2;
+    build.current += (target - build.current) * (1 - Math.exp(-3.2 * dt));
+    const b = build.current;
+    nodeU.uBuild.value = b;
+    linkU.uBuild.value = b;
+    boltU.uBuild.value = b;
+
     nodeU.uTime.value = t;
     nodeU.uActivity.value = p.activityLevel;
     nodeU.uNode.value = p.nodeActivation;
@@ -591,6 +640,11 @@ export function NeuralGlassOrb({
     coreU.uActivity.value = p.activityLevel;
     boltU.uTime.value = t;
     boltU.uActivity.value = p.activityLevel;
+
+    if (extras.current) {
+      const k = Math.max(0, Math.min(1, (b - 0.78) / 0.22));
+      extras.current.scale.setScalar(0.86 + k * 0.14);
+    }
 
     if (group.current) {
       group.current.rotation.y += dt * (variant.spin + p.rotationSpeed * 0.5);
@@ -637,6 +691,7 @@ export function NeuralGlassOrb({
           <bufferAttribute attach="attributes-aSeed" args={[geo.ls, 1]} />
           <bufferAttribute attach="attributes-aEnd" args={[geo.le, 1]} />
           <bufferAttribute attach="attributes-aTint" args={[geo.lt, 1]} />
+            <bufferAttribute attach="attributes-aOrder" args={[geo.lo, 1]} />
         </bufferGeometry>
         <shaderMaterial
           vertexShader={LINK_VERT}
@@ -655,6 +710,7 @@ export function NeuralGlassOrb({
           <bufferAttribute attach="attributes-aSeed" args={[geo.nodeSeed, 1]} />
           <bufferAttribute attach="attributes-aTint" args={[geo.nodeTint, 1]} />
           <bufferAttribute attach="attributes-aScale" args={[geo.nodeScale, 1]} />
+            <bufferAttribute attach="attributes-aOrder" args={[geo.nodeOrder, 1]} />
         </bufferGeometry>
         <shaderMaterial
           vertexShader={NODE_VERT}
@@ -685,7 +741,8 @@ export function NeuralGlassOrb({
         </lineSegments>
       ) : null}
 
-      {/* outward rays */}
+      {/* outward rays + satellites appear with the structure */}
+      <group ref={extras}>
       {rays ? (
         <lineSegments frustumCulled={false}>
           <bufferGeometry>
@@ -694,7 +751,7 @@ export function NeuralGlassOrb({
           <lineBasicMaterial
             color={variant.accent}
             transparent
-            opacity={0.16}
+            opacity={0.1}
             depthWrite={false}
             blending={THREE.AdditiveBlending}
           />
@@ -714,6 +771,7 @@ export function NeuralGlassOrb({
           />
         </mesh>
       ))}
+      </group>
     </group>
   );
 }

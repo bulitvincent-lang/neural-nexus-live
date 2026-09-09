@@ -35,6 +35,8 @@ export interface OrbStageProps {
   managed?: boolean;
   interactive?: boolean;
   bloom?: number;
+  /** 0 = resting, 1 = assembled and lit */
+  energy?: number;
 }
 
 export function OrbStage({
@@ -44,6 +46,7 @@ export function OrbStage({
   managed = false,
   interactive = true,
   bloom = 0.26,
+  energy = 1,
 }: OrbStageProps) {
   const engineRef = useRef<NeuralEngine | null>(null);
   const [visible, setVisible] = useState(true);
@@ -104,7 +107,7 @@ export function OrbStage({
           <Lightformer intensity={1.2} color="#ffae55" position={[3, -1, 0]} rotation-y={-Math.PI / 2} scale={[2, 1, 1]} />
         </Environment>
         <group>
-          <Orb engineRef={engineRef} detail={quality} />
+          <Orb engineRef={engineRef} detail={quality} energy={energy} />
         </group>
       </Suspense>
       {interactive ? (
