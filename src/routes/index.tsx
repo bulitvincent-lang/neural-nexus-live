@@ -16,6 +16,7 @@ import {
   guessPlatform,
   type PlatformId,
 } from "@/config/site";
+import { SiteMenu } from "@/components/site/SiteMenu";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
@@ -72,6 +73,7 @@ function LandingPage() {
         <span className="text-[11px] uppercase tracking-[0.42em] text-[#9db9de]">
           {SITE.name}
         </span>
+        <SiteMenu />
       </div>
 
       {/* Hero — the orb sits in its own space, never behind the words */}

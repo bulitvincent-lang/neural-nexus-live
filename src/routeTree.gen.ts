@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as OrbRouteImport } from './routes/orb'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as ApiPublicMcpActivityRouteImport } from './routes/api/public/mcp-activity'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -37,6 +38,11 @@ const OrbRoute = OrbRouteImport.update({
   path: '/orb',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StoreRoute = StoreRouteImport.update({
   id: '/store',
   path: '/store',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
+  '/privacy': typeof PrivacyRoute
   '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
+  '/privacy': typeof PrivacyRoute
   '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
+  '/privacy': typeof PrivacyRoute
   '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/connect'
     | '/orb'
+    | '/privacy'
     | '/store'
     | '/api/public/mcp-activity'
     | '/api/public/payments/webhook'
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/connect'
     | '/orb'
+    | '/privacy'
     | '/store'
     | '/api/public/mcp-activity'
     | '/api/public/payments/webhook'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/connect'
     | '/orb'
+    | '/privacy'
     | '/store'
     | '/api/public/mcp-activity'
     | '/api/public/payments/webhook'
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ConnectRoute: typeof ConnectRoute
   OrbRoute: typeof OrbRoute
+  PrivacyRoute: typeof PrivacyRoute
   StoreRoute: typeof StoreRoute
   ApiPublicMcpActivityRoute: typeof ApiPublicMcpActivityRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -152,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrbRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/store': {
       id: '/store'
       path: '/store'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ConnectRoute: ConnectRoute,
   OrbRoute: OrbRoute,
+  PrivacyRoute: PrivacyRoute,
   StoreRoute: StoreRoute,
   ApiPublicMcpActivityRoute: ApiPublicMcpActivityRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
