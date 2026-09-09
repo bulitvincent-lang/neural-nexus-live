@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as OrbRouteImport } from './routes/orb'
+import { Route as StoreRouteImport } from './routes/store'
 import { Route as ApiPublicMcpActivityRouteImport } from './routes/api/public/mcp-activity'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const OrbRoute = OrbRouteImport.update({
   path: '/orb',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoreRoute = StoreRouteImport.update({
+  id: '/store',
+  path: '/store',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMcpActivityRoute = ApiPublicMcpActivityRouteImport.update({
   id: '/api/public/mcp-activity',
   path: '/api/public/mcp-activity',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
+  '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
+  '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,28 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/connect': typeof ConnectRoute
   '/orb': typeof OrbRoute
+  '/store': typeof StoreRoute
   '/api/public/mcp-activity': typeof ApiPublicMcpActivityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/connect' | '/orb' | '/api/public/mcp-activity'
+  fullPaths: '/' | '/connect' | '/orb' | '/store' | '/api/public/mcp-activity'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/connect' | '/orb' | '/api/public/mcp-activity'
-  id: '__root__' | '/' | '/connect' | '/orb' | '/api/public/mcp-activity'
+  to: '/' | '/connect' | '/orb' | '/store' | '/api/public/mcp-activity'
+  id:
+    | '__root__'
+    | '/'
+    | '/connect'
+    | '/orb'
+    | '/store'
+    | '/api/public/mcp-activity'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConnectRoute: typeof ConnectRoute
   OrbRoute: typeof OrbRoute
+  StoreRoute: typeof StoreRoute
   ApiPublicMcpActivityRoute: typeof ApiPublicMcpActivityRoute
 }
 
@@ -92,6 +108,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrbRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/store': {
+      id: '/store'
+      path: '/store'
+      fullPath: '/store'
+      preLoaderRoute: typeof StoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/mcp-activity': {
       id: '/api/public/mcp-activity'
       path: '/api/public/mcp-activity'
@@ -106,6 +129,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConnectRoute: ConnectRoute,
   OrbRoute: OrbRoute,
+  StoreRoute: StoreRoute,
   ApiPublicMcpActivityRoute: ApiPublicMcpActivityRoute,
 }
 export const routeTree = rootRouteImport

@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 
 import { NeuralCanvas } from "@/components/neural/NeuralCanvas";
 import {
+  ORB_PRICE,
+  SUBSCRIPTION_INCLUDES,
+  SUBSCRIPTION_PRICE,
+  TRIAL_DAYS,
+  formatPrice,
+} from "@/config/pricing";
+import {
   DOWNLOADS,
   SITE,
   downloadUrl,
@@ -149,6 +156,54 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* Pricing — one price, one CTA */}
+      <section className="mx-auto max-w-3xl px-6 pb-24">
+        <div className="rounded-3xl border border-white/10 bg-[#182238]/80 p-10 text-center">
+          <p className="text-[11px] uppercase tracking-[0.34em] text-[#8ba4c4]">{SITE.name}</p>
+          <p className="mt-5 text-4xl font-light tracking-tight text-[#eaf2ff] sm:text-5xl">
+            {formatPrice(SUBSCRIPTION_PRICE)}{" "}
+            <span className="text-base text-[#9db9de]">/ year</span>
+          </p>
+          <p className="mt-3 text-sm text-[#b3c6de]">{TRIAL_DAYS}-day free trial</p>
+
+          <ul className="mx-auto mt-8 max-w-sm space-y-2 text-left text-[13px] leading-relaxed text-[#a9bdd8]">
+            {SUBSCRIPTION_INCLUDES.map((line) => (
+              <li key={line} className="flex gap-3">
+                <span className="mt-[7px] h-1 w-1 flex-none rounded-full bg-[#7ceaff]" />
+                {line}
+              </li>
+            ))}
+          </ul>
+
+          {ready ? (
+            <a
+              href={downloadUrl(primary)}
+              className="mt-9 inline-flex items-center gap-3 rounded-full border border-[#7ceaff]/40 bg-[#101a30]/60 px-8 py-4 text-sm tracking-wide transition-all hover:border-[#7ceaff]/80 hover:shadow-[0_0_40px_-8px_rgba(124,234,255,0.5)]"
+            >
+              Try Neural Orb free
+              <span className="text-[#9db9de]">{primary.label}</span>
+            </a>
+          ) : (
+            <Link
+              to="/orb"
+              className="mt-9 inline-flex items-center gap-3 rounded-full border border-[#7ceaff]/40 bg-[#101a30]/60 px-8 py-4 text-sm tracking-wide transition-all hover:border-[#7ceaff]/80"
+            >
+              Try Neural Orb free
+            </Link>
+          )}
+
+          <p className="mt-5 text-[11px] leading-relaxed text-[#7f96b6]">
+            No monthly plan, no tiers. Extra orbs are {formatPrice(ORB_PRICE)} each, one-time.
+          </p>
+          <Link
+            to="/store"
+            className="mt-4 inline-block text-[11px] tracking-wide text-[#9db9de] underline-offset-4 transition-colors hover:text-[#dcebff] hover:underline"
+          >
+            See the Orb Store
+          </Link>
+        </div>
+      </section>
+
       <footer className="border-t border-white/10 px-6 py-10 text-center text-[11px] tracking-wide text-[#8098b6]">
         <p>
           {SITE.name} v{SITE.version} · {SITE.domain}
@@ -156,6 +211,9 @@ function LandingPage() {
         <p className="mt-2 flex flex-wrap justify-center gap-4">
           <Link to="/orb" className="transition-colors hover:text-[#dcebff]">
             {t("nav.preview")}
+          </Link>
+          <Link to="/store" className="transition-colors hover:text-[#dcebff]">
+            Orb Store
           </Link>
           <Link to="/connect" className="transition-colors hover:text-[#dcebff]">
             {t("nav.connect")}

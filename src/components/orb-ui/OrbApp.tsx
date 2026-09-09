@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 
-import { NeuralCanvas } from "@/components/neural/NeuralCanvas";
 import { Onboarding } from "@/components/orb-ui/Onboarding";
 import { SettingsPanel } from "@/components/orb-ui/SettingsPanel";
+import { OrbStage } from "@/components/orbs/OrbStage";
+import { useOrbLibrary } from "@/hooks/useOrbLibrary";
 import { useOrbSettings } from "@/hooks/useOrbSettings";
 import { connectorManager } from "@/lib/neural/connectors";
+import { DEFAULT_ORB } from "@/lib/orbs/catalog";
 
 const SEEN_KEY = "neural-sphere.onboarded.v1";
 
 export function OrbApp() {
   const { settings, update } = useOrbSettings();
+  // the free trial starts silently on first launch — nothing is ever displayed
+  const { library } = useOrbLibrary({ beginTrial: true });
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -46,7 +50,11 @@ export function OrbApp() {
           opacity: settings.opacity * (0.55 + settings.intensity * 0.45),
         }}
       >
-        <NeuralCanvas managed powerSaving={settings.powerSaving} />
+        <OrbStage
+          orbId={library?.active_orb ?? DEFAULT_ORB}
+          managed
+          detail={settings.powerSaving ? 0.5 : 1}
+        />
       </div>
 
       {showOnboarding ? <Onboarding onDone={finishOnboarding} /> : null}
